@@ -18,9 +18,9 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
 <template>
   <Transition name="fade">
     <button v-show="visible" class="totop" @click="scrollUp" aria-label="Наверх">
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M10 16V4" />
-        <path d="M4 10l6-6 6 6" />
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 14V4" />
+        <path d="M4 9l5-5 5 5" />
       </svg>
     </button>
   </Transition>
@@ -32,25 +32,25 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
   bottom: 32px;
   right: 32px;
   z-index: 90;
-  width: 44px;
-  height: 44px;
-  border-radius: 10px;
-  border: 1px solid var(--color-border);
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(8px);
-  color: var(--color-text);
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  border: 1px solid var(--color-border-dark);
+  background: var(--color-bg-dark);
+  color: rgba(255, 255, 255, 0.7);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-  transition: background 0.2s, border-color 0.2s, transform 0.2s;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  transition: all 0.25s cubic-bezier(.4,0,.2,1);
 }
 
 .totop:hover {
-  background: var(--color-bg-alt);
-  border-color: #d0d5dd;
-  transform: translateY(-2px);
+  background: var(--color-bg-dark-card-hover);
+  color: #fff;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 28px rgba(0, 0, 0, 0.3);
 }
 
 .fade-enter-active,
@@ -61,15 +61,10 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
-  transform: translateY(8px);
+  transform: translateY(10px);
 }
 
 @media (max-width: 600px) {
-  .totop {
-    bottom: 20px;
-    right: 20px;
-    width: 40px;
-    height: 40px;
-  }
+  .totop { bottom: 20px; right: 20px; width: 42px; height: 42px; }
 }
 </style>

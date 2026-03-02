@@ -4,10 +4,10 @@
 
       <div class="footer__top">
         <div class="footer__brand">
-          <div class="footer__logo">Экстренная бухгалтерия</div>
+          <div class="footer__logo">115-ФЗ Защита</div>
           <p class="footer__tagline">
-            Помощь бизнесу в&nbsp;кризисных ситуациях.
-            Работаем 24/7, 364&nbsp;дня в&nbsp;году.
+            Правовая защита бизнеса при блокировке счетов.
+            Работаем по&nbsp;всей России.
           </p>
         </div>
 
@@ -29,18 +29,13 @@
                 <path d="M15.684 0H8.316C1.592 0 0 1.592 0 8.316v7.368C0 22.408 1.592 24 8.316 24h7.368C22.408 24 24 22.408 24 15.684V8.316C24 1.592 22.391 0 15.684 0zm3.692 17.123h-1.744c-.66 0-.862-.525-2.049-1.714-1.033-1.01-1.49-1.135-1.744-1.135-.356 0-.458.102-.458.593v1.575c0 .424-.135.678-1.253.678-1.846 0-3.896-1.12-5.339-3.202-2.17-3.042-2.763-5.32-2.763-5.785 0-.254.102-.491.593-.491h1.744c.44 0 .61.203.78.678.864 2.49 2.303 4.675 2.896 4.675.22 0 .322-.102.322-.66V9.721c-.068-1.186-.695-1.287-.695-1.71 0-.203.17-.407.44-.407h2.744c.373 0 .508.203.508.644v3.49c0 .373.17.508.271.508.22 0 .407-.135.813-.542 1.254-1.406 2.151-3.574 2.151-3.574.119-.254.322-.491.763-.491h1.744c.525 0 .644.27.525.644-.22 1.017-2.354 4.031-2.354 4.031-.186.305-.254.44 0 .78.186.254.796.779 1.203 1.253.745.847 1.32 1.558 1.473 2.049.17.49-.085.744-.576.744z"/>
               </svg>
             </a>
-            <a href="#" class="footer__social" title="Max" aria-label="Max (ICQ)">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15l-1-3H7l4-9h1l1 3h3l-4 9h-1z"/>
-              </svg>
-            </a>
           </div>
         </div>
       </div>
 
       <div class="footer__bottom">
         <div class="footer__legal">
-          <p>&copy; {{ new Date().getFullYear() }} ООО &laquo;Автопрофи&raquo;</p>
+          <p>&copy; {{ new Date().getFullYear() }} ООО &laquo;Юридическая фирма&raquo;</p>
           <p>ИНН/КПП/ОГРН — уточняются</p>
         </div>
         <div class="footer__links">
@@ -48,16 +43,16 @@
           <a href="#">Договор оферты</a>
         </div>
       </div>
-
     </div>
   </footer>
 </template>
 
 <style scoped>
 .footer {
-  background-color: #1a1a1a;
+  background-color: #080c16;
   color: rgba(255, 255, 255, 0.7);
   padding: 56px 0 40px;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .footer__top {
@@ -66,7 +61,7 @@
   align-items: flex-start;
   gap: 40px;
   padding-bottom: 32px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   margin-bottom: 28px;
 }
 
@@ -80,7 +75,7 @@
 .footer__tagline {
   font-size: 14px;
   line-height: 1.6;
-  color: rgba(255, 255, 255, 0.45);
+  color: rgba(255, 255, 255, 0.35);
   max-width: 320px;
 }
 
@@ -93,7 +88,7 @@
 
 .footer__socials-label {
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(255, 255, 255, 0.3);
 }
 
 .footer__socials-links {
@@ -102,19 +97,21 @@
 }
 
 .footer__social {
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.06);
-  color: rgba(255, 255, 255, 0.6);
-  transition: background 0.2s, color 0.2s;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.5);
+  transition: all 0.25s;
 }
 
 .footer__social:hover {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
   color: #fff;
 }
 
@@ -128,7 +125,7 @@
 .footer__legal p {
   font-size: 13px;
   line-height: 1.6;
-  color: rgba(255, 255, 255, 0.35);
+  color: rgba(255, 255, 255, 0.25);
 }
 
 .footer__links {
@@ -138,36 +135,19 @@
 
 .footer__links a {
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(255, 255, 255, 0.3);
   transition: color 0.2s;
 }
 
 .footer__links a:hover {
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.7);
 }
 
 @media (max-width: 600px) {
-  .footer {
-    padding: 40px 0 32px;
-  }
-
-  .footer__top {
-    flex-direction: column;
-    gap: 28px;
-  }
-
-  .footer__socials {
-    align-items: flex-start;
-  }
-
-  .footer__bottom {
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  .footer__links {
-    flex-direction: column;
-    gap: 8px;
-  }
+  .footer { padding: 40px 0 32px; }
+  .footer__top { flex-direction: column; gap: 28px; }
+  .footer__socials { align-items: flex-start; }
+  .footer__bottom { flex-direction: column; gap: 16px; }
+  .footer__links { flex-direction: column; gap: 8px; }
 }
 </style>

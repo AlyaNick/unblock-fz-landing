@@ -1,92 +1,117 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
-import type { FormInstance } from 'element-plus'
+import { useReveal } from '../composables/useReveal'
 
-const formRef = ref<FormInstance>()
+const sectionRef = ref<HTMLElement | null>(null)
+useReveal(sectionRef)
+
 const submitted = ref(false)
+const errors = reactive<Record<string, string>>({})
 
 const form = reactive({
   name: '',
   phone: '',
   problem: '',
-  needLawyer: false,
-  needFinancier: false,
 })
 
-const rules = {
-  name: [{ required: true, message: 'Укажите имя', trigger: 'blur' }],
-  phone: [{ required: true, message: 'Укажите телефон', trigger: 'blur' }],
+function validate(): boolean {
+  errors.name = form.name.trim() ? '' : 'Укажите имя'
+  errors.phone = form.phone.trim() ? '' : 'Укажите телефон'
+  return !errors.name && !errors.phone
 }
 
-async function onSubmit() {
-  if (!formRef.value) return
-  const valid = await formRef.value.validate().catch(() => false)
-  if (!valid) return
+function onSubmit() {
+  if (!validate()) return
   submitted.value = true
 }
 </script>
 
 <template>
-  <section id="contact" class="cta">
-    <div class="cta__container container">
+  <section id="contact" class="cta" ref="sectionRef">
+    <div class="deco-gradient cta__deco-1"></div>
+    <div class="deco-gradient cta__deco-2"></div>
 
-      <div class="cta__banner">
+    <div class="cta__container container">
+      <div class="cta__banner reveal-left">
+        <span class="section-label section-label--light">Обратная связь</span>
         <h2 class="cta__banner-title">
-          Каждый день просрочки<br />увеличивает риски
+          Каждый день промедления<br />увеличивает риски
         </h2>
         <p class="cta__banner-desc">
-          Получите план действий уже сегодня.
+          Получите правовую оценку ситуации уже сегодня.
         </p>
+
+        <div class="cta__trust">
+          <div class="cta__trust-item">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M13.5 4L6 12l-3.5-3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>Конфиденциально</span>
+          </div>
+          <div class="cta__trust-item">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M13.5 4L6 12l-3.5-3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>По договору</span>
+          </div>
+          <div class="cta__trust-item">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M13.5 4L6 12l-3.5-3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>Ответ в течение часа</span>
+          </div>
+        </div>
       </div>
 
-      <div class="cta__form-card">
-
+      <div class="cta__form-card reveal-right">
         <div v-if="!submitted">
           <h3 class="cta__form-title">Оставить заявку</h3>
 
-          <el-form
-            ref="formRef"
-            :model="form"
-            :rules="rules"
-            label-position="top"
-            class="cta__form"
-          >
+          <form class="cta__form" @submit.prevent="onSubmit" novalidate>
             <div class="cta__row">
-              <el-form-item label="Имя" prop="name" class="cta__field">
-                <el-input v-model="form.name" placeholder="Иван Петров" />
-              </el-form-item>
-              <el-form-item label="Телефон" prop="phone" class="cta__field">
-                <el-input v-model="form.phone" placeholder="+7 (___) ___-__-__" />
-              </el-form-item>
+              <div class="cta__field">
+                <label class="cta__label" for="f-name">Имя</label>
+                <input
+                  id="f-name"
+                  v-model="form.name"
+                  class="cta__input"
+                  :class="{ 'cta__input--error': errors.name }"
+                  type="text"
+                  placeholder="Иван Петров"
+                  @blur="validate"
+                />
+                <span v-if="errors.name" class="cta__error">{{ errors.name }}</span>
+              </div>
+              <div class="cta__field">
+                <label class="cta__label" for="f-phone">Телефон</label>
+                <input
+                  id="f-phone"
+                  v-model="form.phone"
+                  class="cta__input"
+                  :class="{ 'cta__input--error': errors.phone }"
+                  type="tel"
+                  placeholder="+7 (___) ___-__-__"
+                  @blur="validate"
+                />
+                <span v-if="errors.phone" class="cta__error">{{ errors.phone }}</span>
+              </div>
             </div>
 
-            <el-form-item label="Краткое описание ситуации" class="cta__field">
-              <el-input
+            <div class="cta__field">
+              <label class="cta__label" for="f-problem">Краткое описание ситуации</label>
+              <textarea
+                id="f-problem"
                 v-model="form.problem"
-                type="textarea"
-                :rows="3"
+                class="cta__textarea"
+                rows="3"
                 placeholder="Опишите проблему, с которой столкнулись"
-              />
-            </el-form-item>
-
-            <div class="cta__checks">
-              <el-checkbox v-model="form.needLawyer">
-                Нужна консультация юриста
-              </el-checkbox>
-              <el-checkbox v-model="form.needFinancier">
-                Нужна консультация финансиста
-              </el-checkbox>
+              ></textarea>
             </div>
 
-            <el-button
-              type="danger"
-              size="large"
-              class="cta__submit"
-              @click="onSubmit"
-            >
+            <button type="submit" class="btn btn--primary cta__submit">
               Отправить заявку
-            </el-button>
-          </el-form>
+            </button>
+          </form>
         </div>
 
         <div v-else class="cta__success">
@@ -94,64 +119,103 @@ async function onSubmit() {
           <h3 class="cta__success-title">Заявка отправлена</h3>
           <p class="cta__success-desc">
             Мы свяжемся с&nbsp;вами в&nbsp;ближайшее время.
-            Если ситуация срочная — напишите нам в&nbsp;мессенджер.
           </p>
         </div>
-
       </div>
-
     </div>
   </section>
 </template>
 
 <style scoped>
 .cta {
-  background-color: var(--color-bg);
+  background: var(--gradient-dark);
   padding: 96px 0;
+  position: relative;
+  overflow: hidden;
+  color: #fff;
+}
+
+.cta__deco-1 {
+  width: 500px;
+  height: 500px;
+  background: var(--color-accent);
+  top: -200px;
+  left: -150px;
+  opacity: 0.06;
+}
+
+.cta__deco-2 {
+  width: 400px;
+  height: 400px;
+  background: var(--color-navy);
+  bottom: -150px;
+  right: -100px;
+  opacity: 0.1;
 }
 
 .cta__container {
+  position: relative;
+  z-index: 1;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 48px;
-  align-items: start;
-}
-
-/* --- Banner --- */
-.cta__banner {
-  position: sticky;
-  top: 48px;
-  padding-top: 24px;
+  gap: 56px;
+  align-items: center;
 }
 
 .cta__banner-title {
   font-size: 40px;
   font-weight: 800;
   letter-spacing: -0.025em;
-  line-height: 1.2;
-  color: var(--color-text);
+  line-height: 1.15;
+  color: #fff;
   margin-bottom: 16px;
 }
 
 .cta__banner-desc {
   font-size: 18px;
   line-height: 1.6;
-  color: var(--color-text-secondary);
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 32px;
 }
 
-/* --- Form card --- */
+.cta__trust {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cta__trust-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.cta__trust-item svg {
+  color: var(--color-green);
+}
+
 .cta__form-card {
-  background: var(--color-bg-alt);
-  border: 1px solid var(--color-border);
-  border-radius: 14px;
-  padding: 36px 32px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-xl);
+  padding: 40px 36px;
+  backdrop-filter: blur(16px);
 }
 
 .cta__form-title {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 700;
-  color: var(--color-text);
-  margin-bottom: 24px;
+  color: #fff;
+  margin-bottom: 28px;
+}
+
+.cta__form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
 }
 
 .cta__row {
@@ -161,117 +225,107 @@ async function onSubmit() {
 }
 
 .cta__field {
-  margin-bottom: 4px;
-}
-
-.cta__checks {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 20px 0;
-  border-top: 1px solid var(--color-border);
-  margin-top: 8px;
-  margin-bottom: 8px;
+  gap: 6px;
 }
 
-.cta__checks :deep(.el-checkbox__label) {
+.cta__label {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.cta__input,
+.cta__textarea {
+  padding: 14px 16px;
   font-size: 14px;
-  color: var(--color-text);
+  font-family: inherit;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  outline: none;
+  transition: border-color 0.25s, box-shadow 0.25s;
+  width: 100%;
+}
+
+.cta__input::placeholder,
+.cta__textarea::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.cta__input:focus,
+.cta__textarea:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px var(--color-accent-glow);
+}
+
+.cta__input--error {
+  border-color: var(--color-accent);
+}
+
+.cta__textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.cta__error {
+  font-size: 12px;
+  color: #e74c3c;
 }
 
 .cta__submit {
   width: 100%;
-  --el-button-bg-color: var(--color-accent);
-  --el-button-border-color: var(--color-accent);
-  --el-button-hover-bg-color: var(--color-accent-hover);
-  --el-button-hover-border-color: var(--color-accent-hover);
-  --el-button-active-bg-color: #922b21;
-  --el-button-active-border-color: #922b21;
-  --el-button-text-color: #fff;
-  font-weight: 600;
-  font-size: 15px;
-  height: 48px;
-  border-radius: 8px;
+  height: 52px;
+  font-size: 16px;
   margin-top: 4px;
 }
 
-/* --- Success --- */
 .cta__success {
   text-align: center;
   padding: 40px 16px;
 }
 
 .cta__success-icon {
-  width: 52px;
-  height: 52px;
+  width: 56px;
+  height: 56px;
   margin: 0 auto 20px;
-  background: rgba(46, 204, 113, 0.1);
-  color: #2ecc71;
+  background: rgba(39, 174, 96, 0.15);
+  color: var(--color-green);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 700;
 }
 
 .cta__success-title {
   font-size: 22px;
   font-weight: 700;
-  color: var(--color-text);
+  color: #fff;
   margin-bottom: 10px;
 }
 
 .cta__success-desc {
   font-size: 15px;
   line-height: 1.6;
-  color: var(--color-text-secondary);
-  max-width: 340px;
-  margin: 0 auto;
+  color: rgba(255, 255, 255, 0.5);
 }
 
-/* --- Responsive --- */
 @media (max-width: 860px) {
-  .cta {
-    padding: 72px 0;
-  }
-
-  .cta__container {
-    grid-template-columns: 1fr;
-    gap: 36px;
-  }
-
-  .cta__banner {
-    position: static;
-    padding-top: 0;
-    text-align: center;
-  }
-
-  .cta__banner-title {
-    font-size: 32px;
-  }
+  .cta { padding: 72px 0; }
+  .cta__container { grid-template-columns: 1fr; gap: 36px; }
+  .cta__banner-title { font-size: 32px; text-align: center; }
+  .cta__banner-desc { text-align: center; }
+  .cta__trust { align-items: center; }
 }
 
 @media (max-width: 600px) {
-  .cta {
-    padding: 48px 0;
-  }
-
-  .cta__banner-title {
-    font-size: 26px;
-  }
-
-  .cta__banner-desc {
-    font-size: 16px;
-  }
-
-  .cta__form-card {
-    padding: 24px 20px;
-  }
-
-  .cta__row {
-    grid-template-columns: 1fr;
-    gap: 0;
-  }
+  .cta { padding: 48px 0; }
+  .cta__banner-title { font-size: 26px; }
+  .cta__form-card { padding: 28px 20px; }
+  .cta__row { grid-template-columns: 1fr; }
 }
 </style>
