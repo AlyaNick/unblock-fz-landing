@@ -1,475 +1,332 @@
 <script setup lang="ts">
-import { Phone } from '@element-plus/icons-vue'
+import { ref } from 'vue'
+import { useReveal } from '../composables/useReveal'
 
-const problems = [
-  'Счёт заблокирован?',
-  'ФНС требует документы?',
-  'Отчётность не сдавалась?',
-  'Перешли порог НДС в 2025?',
-]
+const sectionRef = ref<HTMLElement | null>(null)
+useReveal(sectionRef)
 
-const steps = [
-  'Анализ ситуации',
-  'План действий',
-  'Работа с банком и ФНС',
-  'Решение проблемы',
+const services = [
+  'Приостановка операций',
+  'Отказ в проведении платежей',
+  'Требование закрыть счет',
+  'Отказ в ДБО',
+  'Включение в перечни риска',
 ]
 </script>
 
 <template>
-  <section id="hero" class="hero">
-    <div class="hero__top">
-      <div class="hero__video">
-        <video autoplay muted loop playsinline preload="auto">
-          <source src="/video.mp4" type="video/mp4" />
-        </video>
-        <div class="hero__video-overlay"></div>
-      </div>
-      <div class="hero__top-content container">
-
-        <div class="hero__head">
-          <div class="hero__badge">
-            <span class="hero__badge-dot"></span>
-            Экстренная бухгалтерская помощь
-          </div>
-
-          <h1 class="hero__title">
-            Экстренная бухгалтерия<br />
-            для бизнеса в кризисе
-          </h1>
-        </div>
-
-        <div class="hero__problems">
-          <div class="hero__problem" v-for="item in problems" :key="item">
-            {{ item }}
-          </div>
-        </div>
-
-        <div class="hero__warning">
-          <p>
-            Каждый день промедления увеличивает штрафы и&nbsp;риски. Мы подключаемся
-            немедленно: разблокируем счета, восстанавливаем учёт и&nbsp;выстраиваем
-            план защиты от&nbsp;доначислений.
-          </p>
-        </div>
-
-      </div>
+  <section id="hero" class="hero" ref="sectionRef">
+    <div class="hero__bg">
+      <video autoplay muted loop playsinline preload="auto">
+        <source src="/video.mp4" type="video/mp4" />
+      </video>
+      <div class="hero__overlay"></div>
+      <div class="hero__grain"></div>
+      <div class="deco-gradient hero__deco-1"></div>
+      <div class="deco-gradient hero__deco-2"></div>
     </div>
 
-    <div class="hero__under container">
-      <div class="hero__process">
-        <div class="hero__process-track">
-          <div class="hero__process-line"></div>
-          <div class="hero__process-fill"></div>
+    <div class="hero__content container">
+      <header class="hero__top reveal">
+        <h1 class="hero__title reveal reveal-delay-1">
+          Экстренная разблокировка счета по&nbsp;115-ФЗ
+        </h1>
+        <p class="hero__tagline">
+          Правовая защита бизнеса при приостановке операций
+        </p>
+      </header>
+
+      <div class="hero__quote-block reveal reveal-delay-2">
+        <div class="hero__quote-line" aria-hidden="true"></div>
+        <p class="hero__quote-text">
+          Вопрос не&nbsp;в&nbsp;эмоциях, а&nbsp;в&nbsp;корректной правовой
+          позиции и&nbsp;доказательной базе.
+        </p>
+      </div>
+
+      <div class="hero__stats-block reveal reveal-delay-2">
+        <div class="hero__stat">
+          <span class="hero__stat-value">24ч</span>
+          <span class="hero__stat-label">подключение</span>
         </div>
-        <div class="hero__process-steps">
-          <div class="hero__process-step" v-for="(step, i) in steps" :key="i">
-            <div class="hero__process-dot" :class="{ 'hero__process-dot--done': i < steps.length - 1, 'hero__process-dot--last': i === steps.length - 1 }">
-              <span class="hero__process-dot-inner">{{ i + 1 }}</span>
-            </div>
-            <div class="hero__process-label">{{ step }}</div>
-          </div>
+        <div class="hero__stat-divider"></div>
+        <div class="hero__stat">
+          <span class="hero__stat-value">200+</span>
+          <span class="hero__stat-label">разблокировок</span>
+        </div>
+        <div class="hero__stat-divider"></div>
+        <div class="hero__stat">
+          <span class="hero__stat-value">93%</span>
+          <span class="hero__stat-label">положительных решений</span>
         </div>
       </div>
 
-      <div class="hero__bottom">
-        <div class="hero__response">
-          <span class="hero__response-value">15 минут</span>
-          <span class="hero__response-sep">&mdash;</span>
-          <span class="hero__response-desc">первичная реакция. Конфиденциально. По договору. С&nbsp;фиксацией ответственности.</span>
-        </div>
+      <div class="hero__services-block reveal reveal-delay-3">
+        <p class="hero__services-label">Сопровождаем бизнес при:</p>
+        <ul class="hero__services-list">
+          <li class="hero__service" v-for="item in services" :key="item">{{ item }}</li>
+        </ul>
+      </div>
 
-        <div class="hero__actions">
-          <el-button type="danger" size="large" class="hero__btn-urgent">
-            Срочная консультация
-          </el-button>
-          <el-button size="large" class="hero__btn-contact">
-            <el-icon class="hero__btn-icon"><Phone /></el-icon>
-            Связаться сейчас
-          </el-button>
+      <div class="hero__connect-block reveal reveal-delay-3">
+        <p class="hero__connect">
+          <span class="hero__connect-dot"></span>
+          Подключаемся в&nbsp;день обращения
+        </p>
+        <div class="hero__buttons">
+          <a href="#contact" class="btn btn--primary btn--lg">
+            Получить правовую оценку
+          </a>
+          <a href="#practice" class="btn btn--outline btn--lg">
+            Как мы работаем
+          </a>
         </div>
       </div>
     </div>
   </section>
 </template>
 
-
 <style scoped>
 .hero {
-  overflow: hidden;
-}
-
-/* --- Video top --- */
-.hero__top {
   position: relative;
-  color: #fff;
-  padding: 96px 0 72px;
+  width: 100%;
+  min-height: calc(100vh - 60px);
+  display: flex;
+  align-items: center;
   overflow: hidden;
 }
 
-.hero__video {
+.hero__bg {
   position: absolute;
   inset: 0;
-  z-index: 0;
 }
 
-.hero__video video {
+.hero__bg video {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.hero__video-overlay {
+.hero__overlay {
   position: absolute;
   inset: 0;
-  background: rgba(10, 10, 10, 0.7);
+  background: linear-gradient(
+    180deg,
+    rgba(12, 18, 32, 0.88) 0%,
+    rgba(12, 18, 32, 0.92) 50%,
+    rgba(12, 18, 32, 0.96) 100%
+  );
 }
 
-.hero__top-content {
+.hero__grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.hero__deco-1 {
+  width: 500px;
+  height: 500px;
+  background: var(--color-accent);
+  top: -200px;
+  right: -100px;
+  opacity: 0.08;
+}
+
+.hero__deco-2 {
+  width: 400px;
+  height: 400px;
+  background: var(--color-navy);
+  bottom: -100px;
+  left: -100px;
+  opacity: 0.12;
+}
+
+.hero__content {
   position: relative;
   z-index: 1;
+  width: 100%;
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 80px 24px 64px;
+  color: #fff;
+  box-sizing: border-box;
 }
 
-/* --- Under video --- */
-.hero__under {
-  background: var(--color-bg);
-  padding: 48px 24px 56px;
-}
-
-/* --- Head --- */
-.hero__head {
-  text-align: center;
+.hero__top {
   margin-bottom: 40px;
-}
-
-.hero__badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 5px 14px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 20px;
-  font-size: 13px;
-  font-weight: 500;
-  color: #e74c3c;
-  margin-bottom: 24px;
-  background: rgba(255, 255, 255, 0.06);
-}
-
-.hero__badge-dot {
-  width: 7px;
-  height: 7px;
-  background-color: var(--color-accent);
-  border-radius: 50%;
-  animation: pulse 2s ease-in-out infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.25; }
 }
 
 .hero__title {
   font-size: 52px;
   font-weight: 800;
-  line-height: 1.15;
-  letter-spacing: -0.025em;
-  color: #fff;
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+  margin-bottom: 12px;
+  background: linear-gradient(135deg, #fff 60%, rgba(255, 255, 255, 0.7));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-/* --- Problems --- */
-.hero__problems {
+.hero__tagline {
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.55);
+  font-weight: 400;
+  margin: 0;
+}
+
+.hero__quote-block {
   display: flex;
-  justify-content: center;
-  gap: 12px;
-  margin-bottom: 36px;
-  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 20px;
+  margin-bottom: 24px;
+  padding: 24px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.hero__problem {
-  padding: 10px 22px;
-  background: rgba(255, 255, 255, 0.07);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 8px;
-  font-size: 15px;
-  font-weight: 500;
-  color: #fff;
-  transition: border-color 0.2s, background 0.2s;
+.hero__quote-line {
+  width: 3px;
+  min-height: 28px;
+  flex-shrink: 0;
+  background: var(--gradient-accent);
+  border-radius: 2px;
 }
 
-.hero__problem:hover {
-  border-color: rgba(231, 76, 60, 0.5);
-  background: rgba(255, 255, 255, 0.1);
-}
-
-/* --- Warning --- */
-.hero__warning {
-  max-width: 720px;
-  margin: 0 auto 56px;
-  text-align: center;
-}
-
-.hero__warning p {
+.hero__quote-text,
+.hero__quote-block p {
   font-size: 17px;
-  line-height: 1.75;
-  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.85);
+  font-style: italic;
+  margin: 0;
+  flex: 1;
+  min-width: 0;
 }
 
-/* --- Process --- */
-.hero__process {
-  position: relative;
-  margin-bottom: 48px;
-  padding: 0 20px;
+.hero__stats-block {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 40px;
+  padding: 28px 32px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(12px);
 }
 
-.hero__process-track {
-  position: absolute;
-  top: 24px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: calc(100% - 160px);
-  height: 4px;
-  border-radius: 2px;
-  background: var(--color-border-light);
-}
-
-.hero__process-fill {
-  height: 100%;
-  width: 75%;
-  border-radius: 2px;
-  background: linear-gradient(90deg, var(--color-accent), #e67e22);
-}
-
-.hero__process-steps {
-  display: flex;
-  justify-content: space-between;
-  position: relative;
-}
-
-.hero__process-step {
+.hero__stat {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
-  flex: 1;
+  gap: 4px;
+  text-align: center;
 }
 
-.hero__process-dot {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  z-index: 1;
-}
-
-.hero__process-dot--done {
-  background: linear-gradient(135deg, var(--color-accent), #e67e22);
-  box-shadow: 0 3px 12px rgba(192, 57, 43, 0.25);
-}
-
-.hero__process-dot--last {
-  background: var(--color-bg);
-  border: 2px solid var(--color-border);
-}
-
-.hero__process-dot--last .hero__process-dot-inner {
-  color: var(--color-text-muted);
-}
-
-.hero__process-dot-inner {
-  font-size: 16px;
-  font-weight: 700;
+.hero__stat-value {
+  font-size: 26px;
+  font-weight: 800;
   color: #fff;
   line-height: 1;
 }
 
-.hero__process-label {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--color-text);
-  text-align: center;
-  max-width: 140px;
+.hero__stat-label {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.5);
 }
 
-/* --- Bottom --- */
-.hero__bottom {
-  border-top: 1px solid var(--color-border);
-  padding-top: 32px;
+.hero__stat-divider {
+  width: 1px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.12);
+  align-self: center;
+}
+
+.hero__services-block {
+  width: 100%;
+}
+
+.hero__services-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.45);
+  margin-bottom: 16px;
+}
+
+.hero__services-list {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  margin: 0 0 32px 0;
+  padding: 0;
+}
+
+.hero__service {
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+}
+
+.hero__connect-block {
+  padding-top: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.hero__connect {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-}
-
-.hero__response {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.hero__response-value {
-  font-size: 20px;
-  font-weight: 800;
-  color: var(--color-accent);
-  white-space: nowrap;
-}
-
-.hero__response-sep {
-  color: var(--color-text-muted);
-}
-
-.hero__response-desc {
+  gap: 10px;
   font-size: 14px;
-  color: var(--color-text-muted);
-  line-height: 1.5;
+  font-weight: 600;
+  color: var(--color-green);
+  margin-bottom: 16px;
 }
 
-.hero__actions {
+.hero__connect-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--color-green);
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(39, 174, 96, 0.5);
+}
+
+.hero__buttons {
   display: flex;
+  flex-wrap: wrap;
   gap: 12px;
-  flex-shrink: 0;
 }
 
-.hero__btn-urgent {
-  --el-button-bg-color: var(--color-accent);
-  --el-button-border-color: var(--color-accent);
-  --el-button-hover-bg-color: var(--color-accent-hover);
-  --el-button-hover-border-color: var(--color-accent-hover);
-  --el-button-active-bg-color: #922b21;
-  --el-button-active-border-color: #922b21;
-  --el-button-text-color: #fff;
-  font-weight: 600;
-  padding: 12px 28px;
-  height: 46px;
-  font-size: 15px;
-  border-radius: 8px;
+.hero__buttons .btn {
+  min-width: 180px;
 }
 
-.hero__btn-contact {
-  --el-button-bg-color: var(--color-bg);
-  --el-button-border-color: var(--color-border);
-  --el-button-hover-bg-color: var(--color-bg-alt);
-  --el-button-hover-border-color: #d0d5dd;
-  --el-button-text-color: var(--color-text);
-  --el-button-hover-text-color: var(--color-text);
-  font-weight: 600;
-  padding: 12px 28px;
-  height: 46px;
-  font-size: 15px;
-  border-radius: 8px;
-}
-
-.hero__btn-icon {
-  margin-right: 6px;
-}
-
-/* --- Responsive --- */
-@media (max-width: 860px) {
-  .hero__top {
-    padding: 64px 0 56px;
-  }
-
-  .hero__title {
-    font-size: 38px;
-  }
-
-  .hero__under {
-    padding: 36px 24px 48px;
-  }
-
-  .hero__process-track {
-    width: calc(100% - 100px);
-  }
-
-  .hero__process-label {
-    font-size: 12px;
-    max-width: 100px;
-  }
-
-  .hero__process-dot {
-    width: 42px;
-    height: 42px;
-  }
-
-  .hero__bottom {
-    flex-direction: column;
-    align-items: flex-start;
-  }
+@media (max-width: 960px) {
+  .hero__title { font-size: 40px; }
+  .hero__stats-block { padding: 24px 20px; }
 }
 
 @media (max-width: 600px) {
-  .hero__top {
-    padding: 48px 0 40px;
+  .hero__content { padding: 48px 24px 40px; }
+  .hero__title { font-size: 30px; }
+  .hero__tagline { font-size: 16px; }
+  .hero__top { margin-bottom: 32px; }
+  .hero__quote-text, .hero__quote-block p { font-size: 15px; }
+  .hero__stats-block {
+    grid-template-columns: 1fr 1fr 1fr;
+    padding: 24px 16px;
   }
-
-  .hero__under {
-    padding: 28px 24px 36px;
-  }
-
-  .hero__title {
-    font-size: 30px;
-  }
-
-  .hero__problems {
-    gap: 8px;
-  }
-
-  .hero__problem {
-    padding: 8px 16px;
-    font-size: 13px;
-  }
-
-  .hero__process {
-    padding: 0;
-  }
-
-  .hero__process-steps {
-    flex-direction: column;
-    gap: 0;
-  }
-
-  .hero__process-step {
-    flex-direction: row;
-    gap: 16px;
-    padding: 12px 0;
-  }
-
-  .hero__process-track {
-    width: 4px;
-    height: calc(100% - 48px);
-    top: 24px;
-    left: 23px;
-    transform: none;
-  }
-
-  .hero__process-fill {
-    width: 100%;
-    height: 75%;
-  }
-
-  .hero__process-dot {
-    width: 40px;
-    height: 40px;
-    flex-shrink: 0;
-  }
-
-  .hero__process-label {
-    text-align: left;
-    max-width: none;
-    font-size: 14px;
-  }
-
-  .hero__actions {
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .hero__response-value {
-    font-size: 18px;
-  }
+  .hero__stat-divider { display: none; }
+  .hero__buttons { flex-direction: column; }
+  .hero__buttons .btn { width: 100%; min-width: 0; }
 }
 </style>
