@@ -42,7 +42,9 @@ const cases = [
 
 const currentIndex = ref(0)
 const visibleCount = ref(2)
+const viewportRef = ref<HTMLElement | null>(null)
 const autoplayDelay = 20000
+const gap = 16
 let timer: ReturnType<typeof setInterval> | null = null
 let pauseTimeout: ReturnType<typeof setTimeout> | null = null
 const totalPages = computed(() => Math.ceil(cases.length / visibleCount.value))
@@ -65,13 +67,25 @@ function manualPrev() { prev(); pauseAndResume() }
 function manualNext() { next(); pauseAndResume() }
 function goTo(page: number) { currentIndex.value = page; pauseAndResume() }
 
-onMounted(() => { updateVisibleCount(); window.addEventListener('resize', updateVisibleCount); startAutoplay() })
-onUnmounted(() => { stopAutoplay(); if (pauseTimeout) clearTimeout(pauseTimeout); window.removeEventListener('resize', updateVisibleCount) })
-
 const trackOffset = computed(() => {
-  const offset = currentIndex.value * visibleCount.value
-  const cardPercent = 100 / visibleCount.value
-  return `translateX(-${offset * cardPercent}%)`
+  const el = viewportRef.value
+  if (!el) return 'translateX(0)'
+  const w = el.clientWidth
+  const n = visibleCount.value
+  const cardWidth = (w - gap * (n - 1)) / n
+  const shift = currentIndex.value * (cardWidth + gap)
+  return `translateX(-${shift}px)`
+})
+
+onMounted(() => {
+  updateVisibleCount()
+  window.addEventListener('resize', updateVisibleCount)
+  startAutoplay()
+})
+onUnmounted(() => {
+  stopAutoplay()
+  if (pauseTimeout) clearTimeout(pauseTimeout)
+  window.removeEventListener('resize', updateVisibleCount)
 })
 </script>
 
@@ -81,53 +95,61 @@ const trackOffset = computed(() => {
     <div class="deco-gradient cases__deco-2"></div>
 
     <div class="cases__container container">
-      <div class="cases__header reveal">
-        <div class="cases__head">
-          <span class="section-label section-label--light">Практика</span>
-          <h2 class="cases__title section-title">Кейсы</h2>
-          <p class="cases__subtitle">
-            Реальные ситуации наших клиентов — от&nbsp;проблемы до&nbsp;результата.
-          </p>
-        </div>
-        <div class="cases__nav">
-          <button class="cases__nav-btn" @click="manualPrev" aria-label="Назад">
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-              <path d="M11 14L6 9l5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </button>
-          <button class="cases__nav-btn" @click="manualNext" aria-label="Вперёд">
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-              <path d="M7 4l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </button>
-        </div>
+      <div class="cases__head reveal">
+        <span class="section-label section-label--light">Практика</span>
+        <h2 class="cases__title section-title">Кейсы</h2>
+        <p class="cases__subtitle">
+          Реальные ситуации наших клиентов — от&nbsp;проблемы до&nbsp;результата.
+        </p>
       </div>
 
-      <div class="cases__viewport reveal reveal-delay-1">
-        <div class="cases__track" :style="{ transform: trackOffset }">
-          <div class="cases__card" v-for="item in cases" :key="item.title">
-            <div class="cases__card-top">
-              <div class="cases__card-tag">{{ item.tag }}</div>
-              <div class="cases__card-duration">{{ item.duration }}</div>
-            </div>
-            <h3 class="cases__card-title">{{ item.title }}</h3>
+      <div class="cases__carousel reveal">
+        <button
+          class="cases__arrow cases__arrow--left"
+          @click="manualPrev"
+          aria-label="Назад"
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
 
-            <div class="cases__card-section">
-              <div class="cases__card-label">Проблема</div>
-              <p>{{ item.problem }}</p>
-            </div>
+        <div ref="viewportRef" class="cases__viewport">
+          <div class="cases__track" :style="{ transform: trackOffset }">
+            <div class="cases__card" v-for="item in cases" :key="item.title">
+              <div class="cases__card-top">
+                <div class="cases__card-tag">{{ item.tag }}</div>
+                <div class="cases__card-duration">{{ item.duration }}</div>
+              </div>
+              <h3 class="cases__card-title">{{ item.title }}</h3>
 
-            <div class="cases__card-section">
-              <div class="cases__card-label">Решение</div>
-              <p>{{ item.solution }}</p>
-            </div>
+              <div class="cases__card-section">
+                <div class="cases__card-label">Проблема</div>
+                <p>{{ item.problem }}</p>
+              </div>
 
-            <div class="cases__card-footer">
-              <div class="cases__card-label">Результат</div>
-              <p class="cases__card-result-text">{{ item.result }}</p>
+              <div class="cases__card-section">
+                <div class="cases__card-label">Решение</div>
+                <p>{{ item.solution }}</p>
+              </div>
+
+              <div class="cases__card-footer">
+                <div class="cases__card-label">Результат</div>
+                <p class="cases__card-result-text">{{ item.result }}</p>
+              </div>
             </div>
           </div>
         </div>
+
+        <button
+          class="cases__arrow cases__arrow--right"
+          @click="manualNext"
+          aria-label="Вперёд"
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
       </div>
 
       <div class="cases__dots reveal">
@@ -170,17 +192,20 @@ const trackOffset = computed(() => {
   opacity: 0.1;
 }
 
-.cases__container { position: relative; z-index: 1; }
+.cases__container {
+  position: relative;
+  z-index: 1;
+}
 
-.cases__header {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 24px;
+.cases__head {
+  text-align: left;
   margin-bottom: 48px;
 }
 
-.cases__title { color: #fff; margin-bottom: 8px; }
+.cases__title {
+  color: #fff;
+  margin-bottom: 8px;
+}
 
 .cases__subtitle {
   font-size: 16px;
@@ -188,54 +213,67 @@ const trackOffset = computed(() => {
   color: rgba(255, 255, 255, 0.5);
 }
 
-.cases__nav { display: flex; gap: 8px; flex-shrink: 0; }
+.cases__carousel {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 32px;
+}
 
-.cases__nav-btn {
-  width: 44px;
-  height: 44px;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.04);
-  color: rgba(255, 255, 255, 0.7);
+.cases__arrow {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.8);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.25s;
-  backdrop-filter: blur(8px);
 }
 
-.cases__nav-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.25);
+.cases__arrow:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.35);
   color: #fff;
 }
 
-.cases__viewport { overflow: hidden; margin-bottom: 32px; }
+.cases__viewport {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  padding: 4px 0;
+}
 
 .cases__track {
   display: flex;
   gap: 16px;
-  transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  padding: 0 2px;
 }
 
 .cases__card {
-  min-width: calc((100% - 16px) / 2);
+  flex: 0 0 calc((100% - 16px) / 2);
+  width: calc((100% - 16px) / 2);
   max-width: calc((100% - 16px) / 2);
-  background: var(--color-bg-dark-card);
-  border: 1px solid var(--color-border-dark);
+  background: #fff;
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: 32px 28px;
   display: flex;
   flex-direction: column;
   gap: 18px;
-  flex-shrink: 0;
   transition: all 0.3s;
+  color: var(--color-text);
+  overflow: visible;
+  box-sizing: border-box;
 }
 
 .cases__card:hover {
-  border-color: rgba(255, 255, 255, 0.15);
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
 }
 
 .cases__card-top {
@@ -250,23 +288,23 @@ const trackOffset = computed(() => {
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.02em;
-  background: rgba(192, 57, 43, 0.15);
-  color: #e74c3c;
+  background: var(--color-accent-light);
+  color: var(--color-accent);
 }
 
 .cases__card-duration {
   font-size: 13px;
   font-weight: 600;
-  color: var(--color-accent);
+  color: var(--color-navy);
   padding: 4px 12px;
-  background: rgba(192, 57, 43, 0.08);
+  background: var(--color-navy-light);
   border-radius: 6px;
 }
 
 .cases__card-title {
   font-size: 17px;
   font-weight: 700;
-  color: #fff;
+  color: var(--color-text);
   line-height: 1.35;
 }
 
@@ -281,19 +319,19 @@ const trackOffset = computed(() => {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: rgba(255, 255, 255, 0.35);
+  color: var(--color-text-muted);
 }
 
 .cases__card-section p {
   font-size: 14px;
   line-height: 1.65;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--color-text-secondary);
 }
 
 .cases__card-footer {
   margin-top: auto;
   padding-top: 18px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid var(--color-border-light);
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -306,7 +344,11 @@ const trackOffset = computed(() => {
   line-height: 1.4;
 }
 
-.cases__dots { display: flex; justify-content: center; gap: 8px; }
+.cases__dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
 
 .cases__dot {
   width: 8px;
@@ -327,9 +369,31 @@ const trackOffset = computed(() => {
 }
 
 @media (max-width: 700px) {
-  .cases { padding: 56px 0; }
-  .cases__title { font-size: 26px; }
-  .cases__header { flex-direction: column; align-items: flex-start; gap: 16px; margin-bottom: 32px; }
-  .cases__card { min-width: 100%; max-width: 100%; padding: 24px 20px; }
+  .cases {
+    padding: 56px 0;
+  }
+
+  .cases__title {
+    font-size: 26px;
+  }
+
+  .cases__head {
+    margin-bottom: 32px;
+  }
+
+  .cases__carousel {
+    gap: 12px;
+  }
+
+  .cases__arrow {
+    width: 40px;
+    height: 40px;
+  }
+
+  .cases__card {
+    min-width: 100%;
+    max-width: 100%;
+    padding: 24px 20px;
+  }
 }
 </style>

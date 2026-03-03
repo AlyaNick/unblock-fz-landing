@@ -64,9 +64,9 @@ function onLogoError(name: string) {
         </div>
       </div>
 
-      <div class="banks__extra reveal">
-        <div class="banks__regional">+ региональные банки</div>
-      </div>
+      <p class="banks__extra reveal">
+        Региональные банки и&nbsp;другие кредитные организации — работаем по&nbsp;всей России.
+      </p>
     </div>
   </section>
 </template>
@@ -104,7 +104,7 @@ function onLogoError(name: string) {
 }
 
 .banks__head {
-  text-align: center;
+  text-align: left;
   margin-bottom: 56px;
 }
 
@@ -117,7 +117,6 @@ function onLogoError(name: string) {
   font-size: 17px;
   line-height: 1.7;
   color: rgba(255, 255, 255, 0.5);
-  max-width: 520px;
   margin: 0 auto;
 }
 
@@ -197,16 +196,10 @@ function onLogoError(name: string) {
 
 .banks__extra {
   text-align: center;
-}
-
-.banks__regional {
-  display: inline-block;
-  padding: 10px 28px;
-  border: 1px dashed rgba(255, 255, 255, 0.15);
-  border-radius: 28px;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 15px;
+  line-height: 1.6;
   color: rgba(255, 255, 255, 0.5);
+  margin: 0;
 }
 
 @media (max-width: 960px) {

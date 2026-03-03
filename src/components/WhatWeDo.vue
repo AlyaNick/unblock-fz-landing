@@ -1,9 +1,30 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useReveal } from '../composables/useReveal'
 
 const sectionRef = ref<HTMLElement | null>(null)
 useReveal(sectionRef)
+
+const BALL_LOOP_MS = 12000
+const activeStep = ref(0)
+let startTime = 0
+let rafId = 0
+
+function tick() {
+  const elapsed = (Date.now() - startTime) % BALL_LOOP_MS
+  const step = Math.floor((elapsed / BALL_LOOP_MS) * 3) % 3
+  if (step !== activeStep.value) activeStep.value = step
+  rafId = requestAnimationFrame(tick)
+}
+
+onMounted(() => {
+  startTime = Date.now()
+  rafId = requestAnimationFrame(tick)
+})
+
+onUnmounted(() => {
+  cancelAnimationFrame(rafId)
+})
 
 const stages = [
   {
@@ -11,21 +32,18 @@ const stages = [
     title: 'Правовой аудит ситуации',
     items: ['Выписки', 'Договорную модель', 'Структуру оборотов', 'Налоговую нагрузку', 'Деловую цель операций'],
     label: 'Анализируем:',
-    icon: '&#9783;',
   },
   {
     num: '02',
     title: 'Формирование доказательной позиции',
     items: ['Структурированное пояснение', 'Подтверждение экономического смысла', 'Обоснование деловой цели', 'Пакет первичных документов', 'Корректировку договорной базы'],
     label: 'Готовим:',
-    icon: '&#9998;',
   },
   {
     num: '03',
     title: 'Процессуальное сопровождение',
     items: ['Ведем коммуникацию с банком', 'Фиксируем сроки и нарушения', 'Формируем досудебную позицию', 'Оцениваем перспективу суда'],
     label: '',
-    icon: '&#9878;',
   },
 ]
 
@@ -51,28 +69,49 @@ const results = [
         </p>
       </div>
 
-      <div class="practice__stages">
-        <template v-for="(stage, i) in stages" :key="stage.num">
-          <div class="practice__stage reveal" :class="'reveal-delay-' + (i + 1)">
-            <div class="practice__stage-top">
-              <div class="practice__stage-num-wrap">
-                <span class="practice__stage-num">{{ stage.num }}</span>
-              </div>
-              <div class="practice__stage-badge" v-html="stage.icon"></div>
-            </div>
-            <h3 class="practice__stage-title">{{ stage.title }}</h3>
-            <p v-if="stage.label" class="practice__stage-label">{{ stage.label }}</p>
-            <ul class="practice__stage-list">
-              <li v-for="item in stage.items" :key="item">{{ item }}</li>
-            </ul>
+      <div class="practice__wave-block reveal">
+        <svg class="practice__wave" viewBox="0 0 1000 60" preserveAspectRatio="none">
+          <path
+            id="practiceWavePath"
+            class="practice__wave-path"
+            d="M0 30 Q 250 0 500 30 Q 750 60 1000 30"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+          />
+          <circle class="practice__wave-ball" r="6" fill="var(--color-accent)">
+            <animateMotion dur="12s" repeatCount="indefinite" keyTimes="0;1" keyPoints="0;1">
+              <mpath href="#practiceWavePath" />
+            </animateMotion>
+          </circle>
+        </svg>
+        <div class="practice__wave-dots">
+          <div
+            v-for="(stage, i) in stages"
+            :key="stage.num"
+            class="practice__wave-dot"
+            :class="{ 'practice__wave-dot--active': activeStep === i }"
+            :style="{ left: (i / (stages.length - 1)) * 100 + '%' }"
+          >
+            <span class="practice__wave-dot-num">{{ stage.num }}</span>
           </div>
+        </div>
+      </div>
 
-          <div v-if="i < stages.length - 1" class="practice__arrow">
-            <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-              <path d="M15 20h10M21 15l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </div>
-        </template>
+      <div class="practice__steps reveal">
+        <div
+          class="practice__step"
+          :class="{ 'practice__step--active': activeStep === i }"
+          v-for="(stage, i) in stages"
+          :key="stage.num"
+        >
+          <h3 class="practice__step-title">{{ stage.title }}</h3>
+          <p v-if="stage.label" class="practice__step-label">{{ stage.label }}</p>
+          <ul class="practice__step-list">
+            <li v-for="item in stage.items" :key="item">{{ item }}</li>
+          </ul>
+        </div>
       </div>
 
       <div class="practice__results reveal">
@@ -142,8 +181,8 @@ const results = [
 }
 
 .practice__head {
-  text-align: center;
-  margin-bottom: 64px;
+  text-align: left;
+  margin-bottom: 48px;
 }
 
 .practice__title {
@@ -151,74 +190,108 @@ const results = [
 }
 
 .practice__subtitle {
-  margin: 0 auto;
+  margin: 0;
 }
 
-.practice__stages {
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  gap: 0;
-  margin-bottom: 48px;
-}
-
-.practice__stage {
-  flex: 1;
-  max-width: 340px;
-  padding: 32px 28px;
-  background: var(--color-bg);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  transition: all 0.3s cubic-bezier(.4,0,.2,1);
+.practice__wave-block {
   position: relative;
+  height: 72px;
+  margin-bottom: 40px;
 }
 
-.practice__stage:hover {
-  border-color: var(--color-navy);
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-4px);
+.practice__wave {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 72px;
+  width: 100%;
+  color: var(--color-border);
 }
 
-.practice__stage-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 20px;
-}
-
-.practice__stage-num-wrap {
-  width: 48px;
-  height: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--gradient-accent);
-  border-radius: 12px;
-  box-shadow: 0 4px 12px var(--color-accent-glow);
-}
-
-.practice__stage-num {
-  font-size: 18px;
-  font-weight: 800;
-  color: #fff;
-}
-
-.practice__stage-badge {
-  font-size: 24px;
-  color: var(--color-text-muted);
+.practice__wave-path {
+  stroke: var(--color-navy);
   opacity: 0.4;
 }
 
-.practice__stage-title {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--color-text);
-  line-height: 1.3;
-  margin-bottom: 14px;
+.practice__wave-ball {
+  filter: drop-shadow(0 0 6px var(--color-accent-glow));
+  pointer-events: none;
 }
 
-.practice__stage-label {
-  font-size: 12px;
+.practice__wave-dots {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 0;
+  pointer-events: none;
+}
+
+.practice__wave-dot {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 2px solid var(--color-accent);
+  background: var(--color-bg);
+  color: var(--color-accent);
+  font-size: 14px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-sm);
+  pointer-events: auto;
+  cursor: default;
+  transition: border-color 0.5s ease, background 0.5s ease, box-shadow 0.5s ease, color 0.5s ease;
+}
+
+.practice__wave-dot--active {
+  background: var(--gradient-accent);
+  color: #fff;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px var(--color-accent-light), var(--shadow-md);
+}
+
+.practice__wave-dot-num {
+  line-height: 1;
+}
+
+.practice__steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-bottom: 48px;
+}
+
+.practice__step {
+  padding: 24px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  transition: border-color 0.5s ease, box-shadow 0.5s ease;
+  cursor: default;
+}
+
+.practice__step:hover,
+.practice__step--active {
+  border-color: var(--color-navy);
+  box-shadow: var(--shadow-md);
+}
+
+.practice__step-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 10px;
+  line-height: 1.3;
+}
+
+.practice__step-label {
+  font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -226,43 +299,33 @@ const results = [
   margin-bottom: 12px;
 }
 
-.practice__stage-list {
+.practice__step-list {
   list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  margin: 0;
+  padding: 0;
 }
 
-.practice__stage-list li {
+.practice__step-list li {
   position: relative;
-  padding-left: 16px;
-  font-size: 14px;
-  line-height: 1.6;
+  padding-left: 14px;
+  font-size: 13px;
+  line-height: 1.65;
   color: var(--color-text-secondary);
 }
 
-.practice__stage-list li::before {
+.practice__step-list li::before {
   content: '';
   position: absolute;
   left: 0;
-  top: 10px;
-  width: 5px;
-  height: 5px;
+  top: 8px;
+  width: 4px;
+  height: 4px;
   border-radius: 50%;
   background: var(--color-accent);
 }
 
-.practice__arrow {
-  display: flex;
-  align-items: center;
-  padding: 0 8px;
-  margin-top: 56px;
-  color: var(--color-text-muted);
-}
-
 .practice__results {
-  max-width: 840px;
-  margin: 0 auto 40px;
+  margin-bottom: 40px;
 }
 
 .practice__results-inner {
@@ -315,11 +378,6 @@ const results = [
   flex-shrink: 0;
 }
 
-.practice__mission {
-  max-width: 680px;
-  margin: 0 auto;
-}
-
 .practice__mission-inner {
   display: flex;
   gap: 20px;
@@ -343,15 +401,18 @@ const results = [
   line-height: 1.6;
 }
 
-@media (max-width: 960px) {
-  .practice__stages { flex-direction: column; align-items: center; }
-  .practice__stage { max-width: 100%; }
-  .practice__arrow { transform: rotate(90deg); padding: 8px 0; margin-top: 0; }
+@media (max-width: 900px) {
+  .practice__steps {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 600px) {
   .practice { padding: 56px 0; }
-  .practice__stage { padding: 24px 20px; }
+  .practice__wave-block { height: 56px; margin-bottom: 32px; }
+  .practice__wave { height: 56px; }
+  .practice__wave-dot { width: 40px; height: 40px; font-size: 12px; }
+  .practice__step { padding: 20px; }
   .practice__results-inner { padding: 24px; }
   .practice__results-grid { grid-template-columns: 1fr; }
   .practice__mission-inner { padding: 20px; }

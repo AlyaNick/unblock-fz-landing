@@ -190,7 +190,6 @@ button {
   font-size: 17px;
   line-height: 1.7;
   color: var(--color-text-secondary);
-  max-width: 560px;
 }
 
 /* ---- Reveal Animations ---- */

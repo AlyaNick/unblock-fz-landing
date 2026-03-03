@@ -5,7 +5,6 @@ const scrolled = ref(false)
 const mobileOpen = ref(false)
 
 const links = [
-  { href: '#hero', label: 'Главная' },
   { href: '#banks', label: 'Банки' },
   { href: '#reasons', label: 'Причины' },
   { href: '#practice', label: 'Практика' },

@@ -22,63 +22,29 @@ const services = [
       </video>
       <div class="hero__overlay"></div>
       <div class="hero__grain"></div>
-
       <div class="deco-gradient hero__deco-1"></div>
       <div class="deco-gradient hero__deco-2"></div>
     </div>
 
     <div class="hero__content container">
-      <div class="hero__badge reveal">
-        <span class="hero__badge-dot"></span>
-        Правовая защита бизнеса
-      </div>
+      <header class="hero__top reveal">
+        <h1 class="hero__title reveal reveal-delay-1">
+          Экстренная разблокировка счета по&nbsp;115-ФЗ
+        </h1>
+        <p class="hero__tagline">
+          Правовая защита бизнеса при приостановке операций
+        </p>
+      </header>
 
-      <h1 class="hero__title reveal reveal-delay-1">
-        Экстренная разблокировка<br />счета по&nbsp;115-ФЗ
-      </h1>
-
-      <p class="hero__subtitle reveal reveal-delay-2">
-        Правовая защита бизнеса при приостановке операций
-      </p>
-
-      <div class="hero__quote reveal reveal-delay-3">
-        <div class="hero__quote-line"></div>
-        <p>
+      <div class="hero__quote-block reveal reveal-delay-2">
+        <div class="hero__quote-line" aria-hidden="true"></div>
+        <p class="hero__quote-text">
           Вопрос не&nbsp;в&nbsp;эмоциях, а&nbsp;в&nbsp;корректной правовой
           позиции и&nbsp;доказательной базе.
         </p>
       </div>
 
-      <div class="hero__grid reveal reveal-delay-3">
-        <div class="hero__services">
-          <p class="hero__services-label">Мы сопровождаем бизнес при:</p>
-          <div class="hero__services-list">
-            <div class="hero__service" v-for="item in services" :key="item">
-              <span class="hero__service-icon">
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                  <circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="1.5"/>
-                  <circle cx="6" cy="6" r="2" fill="currentColor"/>
-                </svg>
-              </span>
-              <span>{{ item }}</span>
-            </div>
-          </div>
-        </div>
-        <div class="hero__cta-block">
-          <div class="hero__connect">
-            <span class="hero__connect-indicator"></span>
-            Подключаемся в&nbsp;день обращения
-          </div>
-          <a href="#contact" class="btn btn--primary btn--lg hero__cta-btn">
-            Получить правовую оценку
-          </a>
-          <a href="#practice" class="btn btn--outline hero__cta-btn-secondary">
-            Как мы работаем
-          </a>
-        </div>
-      </div>
-
-      <div class="hero__stats reveal reveal-delay-4">
+      <div class="hero__stats-block reveal reveal-delay-2">
         <div class="hero__stat">
           <span class="hero__stat-value">24ч</span>
           <span class="hero__stat-label">подключение</span>
@@ -94,6 +60,28 @@ const services = [
           <span class="hero__stat-label">положительных решений</span>
         </div>
       </div>
+
+      <div class="hero__services-block reveal reveal-delay-3">
+        <p class="hero__services-label">Сопровождаем бизнес при:</p>
+        <ul class="hero__services-list">
+          <li class="hero__service" v-for="item in services" :key="item">{{ item }}</li>
+        </ul>
+      </div>
+
+      <div class="hero__connect-block reveal reveal-delay-3">
+        <p class="hero__connect">
+          <span class="hero__connect-dot"></span>
+          Подключаемся в&nbsp;день обращения
+        </p>
+        <div class="hero__buttons">
+          <a href="#contact" class="btn btn--primary btn--lg">
+            Получить правовую оценку
+          </a>
+          <a href="#practice" class="btn btn--outline btn--lg">
+            Как мы работаем
+          </a>
+        </div>
+      </div>
     </div>
   </section>
 </template>
@@ -101,6 +89,7 @@ const services = [
 <style scoped>
 .hero {
   position: relative;
+  width: 100%;
   min-height: calc(100vh - 60px);
   display: flex;
   align-items: center;
@@ -157,168 +146,72 @@ const services = [
 .hero__content {
   position: relative;
   z-index: 1;
-  padding-top: 80px;
-  padding-bottom: 64px;
+  width: 100%;
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 80px 24px 64px;
   color: #fff;
+  box-sizing: border-box;
 }
 
-.hero__badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 16px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 24px;
-  font-size: 13px;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.7);
-  background: rgba(255, 255, 255, 0.04);
-  margin-bottom: 28px;
-  backdrop-filter: blur(8px);
-}
-
-.hero__badge-dot {
-  width: 8px;
-  height: 8px;
-  background: var(--color-accent);
-  border-radius: 50%;
-  box-shadow: 0 0 12px var(--color-accent-glow);
-  animation: pulse 2s ease-in-out infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; box-shadow: 0 0 12px var(--color-accent-glow); }
-  50% { opacity: 0.4; box-shadow: 0 0 4px var(--color-accent-glow); }
+.hero__top {
+  margin-bottom: 40px;
 }
 
 .hero__title {
-  font-size: 56px;
+  font-size: 52px;
   font-weight: 800;
-  line-height: 1.1;
+  line-height: 1.12;
   letter-spacing: -0.03em;
-  margin-bottom: 16px;
-  background: linear-gradient(135deg, #fff 60%, rgba(255, 255, 255, 0.6));
+  margin-bottom: 12px;
+  background: linear-gradient(135deg, #fff 60%, rgba(255, 255, 255, 0.7));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-.hero__subtitle {
-  font-size: 20px;
-  color: rgba(255, 255, 255, 0.5);
-  margin-bottom: 40px;
+.hero__tagline {
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.55);
   font-weight: 400;
+  margin: 0;
 }
 
-.hero__quote {
+.hero__quote-block {
   display: flex;
+  align-items: stretch;
   gap: 20px;
+  margin-bottom: 24px;
   padding: 24px 0;
-  margin-bottom: 48px;
-  max-width: 640px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .hero__quote-line {
   width: 3px;
+  min-height: 28px;
   flex-shrink: 0;
   background: var(--gradient-accent);
   border-radius: 2px;
 }
 
-.hero__quote p {
+.hero__quote-text,
+.hero__quote-block p {
   font-size: 17px;
   line-height: 1.7;
-  color: rgba(255, 255, 255, 0.75);
-  font-style: italic;
-}
-
-.hero__grid {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 56px;
-  align-items: start;
-  margin-bottom: 56px;
-}
-
-.hero__services-label {
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: rgba(255, 255, 255, 0.4);
-  margin-bottom: 20px;
-}
-
-.hero__services-list {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.hero__service {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  font-size: 15px;
-  font-weight: 500;
   color: rgba(255, 255, 255, 0.85);
+  font-style: italic;
+  margin: 0;
+  flex: 1;
+  min-width: 0;
 }
 
-.hero__service-icon {
-  color: var(--color-accent);
-  flex-shrink: 0;
-}
-
-.hero__cta-block {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  padding: 32px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: var(--radius-lg);
-  backdrop-filter: blur(12px);
-}
-
-.hero__connect {
-  display: flex;
+.hero__stats-block {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr;
   align-items: center;
-  gap: 10px;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--color-accent);
-  margin-bottom: 8px;
-}
-
-.hero__connect-indicator {
-  width: 8px;
-  height: 8px;
-  background: var(--color-green);
-  border-radius: 50%;
-  box-shadow: 0 0 8px rgba(39, 174, 96, 0.5);
-  animation: pulse-green 2s ease-in-out infinite;
-}
-
-@keyframes pulse-green {
-  0%, 100% { box-shadow: 0 0 8px rgba(39, 174, 96, 0.5); }
-  50% { box-shadow: 0 0 2px rgba(39, 174, 96, 0.2); }
-}
-
-.hero__cta-btn {
-  width: 100%;
-  text-align: center;
-}
-
-.hero__cta-btn-secondary {
-  width: 100%;
-  text-align: center;
-}
-
-.hero__stats {
-  display: flex;
-  align-items: center;
-  gap: 32px;
-  padding: 28px 36px;
+  gap: 0;
+  margin-bottom: 40px;
+  padding: 28px 32px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--radius-lg);
@@ -328,11 +221,13 @@ const services = [
 .hero__stat {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 4px;
+  text-align: center;
 }
 
 .hero__stat-value {
-  font-size: 28px;
+  font-size: 26px;
   font-weight: 800;
   color: #fff;
   line-height: 1;
@@ -340,33 +235,98 @@ const services = [
 
 .hero__stat-label {
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.45);
+  color: rgba(255, 255, 255, 0.5);
 }
 
 .hero__stat-divider {
   width: 1px;
-  height: 40px;
-  background: rgba(255, 255, 255, 0.1);
+  height: 36px;
+  background: rgba(255, 255, 255, 0.12);
+  align-self: center;
+}
+
+.hero__services-block {
+  width: 100%;
+}
+
+.hero__services-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.45);
+  margin-bottom: 16px;
+}
+
+.hero__services-list {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  margin: 0 0 32px 0;
+  padding: 0;
+}
+
+.hero__service {
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+}
+
+.hero__connect-block {
+  padding-top: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.hero__connect {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-green);
+  margin-bottom: 16px;
+}
+
+.hero__connect-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--color-green);
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(39, 174, 96, 0.5);
+}
+
+.hero__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.hero__buttons .btn {
+  min-width: 180px;
 }
 
 @media (max-width: 960px) {
-  .hero__title { font-size: 42px; }
-  .hero__grid { grid-template-columns: 1fr; gap: 32px; }
-  .hero__stats { gap: 24px; padding: 24px; }
+  .hero__title { font-size: 40px; }
+  .hero__stats-block { padding: 24px 20px; }
 }
 
 @media (max-width: 600px) {
-  .hero__content { padding-top: 48px; padding-bottom: 40px; }
-  .hero__title { font-size: 32px; }
-  .hero__subtitle { font-size: 17px; margin-bottom: 28px; }
-  .hero__quote { margin-bottom: 32px; }
-  .hero__cta-block { padding: 24px; }
-  .hero__stats {
-    flex-direction: column;
-    gap: 20px;
-    align-items: flex-start;
+  .hero__content { padding: 48px 24px 40px; }
+  .hero__title { font-size: 30px; }
+  .hero__tagline { font-size: 16px; }
+  .hero__top { margin-bottom: 32px; }
+  .hero__quote-text, .hero__quote-block p { font-size: 15px; }
+  .hero__stats-block {
+    grid-template-columns: 1fr 1fr 1fr;
+    padding: 24px 16px;
   }
-  .hero__stat-divider { width: 100%; height: 1px; }
-  .hero__stat { flex-direction: row; align-items: baseline; gap: 10px; }
+  .hero__stat-divider { display: none; }
+  .hero__buttons { flex-direction: column; }
+  .hero__buttons .btn { width: 100%; min-width: 0; }
 }
 </style>
