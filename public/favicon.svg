@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="6" fill="#0c1220"/>
+  <!-- Pillar -->
+  <path d="M16 6v6" stroke="#c0392b" stroke-width="1.6" stroke-linecap="round"/>
+  <!-- Beam -->
+  <path d="M8 12h16" stroke="#c0392b" stroke-width="1.6" stroke-linecap="round"/>
+  <!-- Left arm + pan -->
+  <path d="M10 12v6" stroke="#c0392b" stroke-width="1.4" stroke-linecap="round"/>
+  <path d="M8 20h4" stroke="#c0392b" stroke-width="1.4" stroke-linecap="round"/>
+  <!-- Right arm + pan -->
+  <path d="M22 12v6" stroke="#c0392b" stroke-width="1.4" stroke-linecap="round"/>
+  <path d="M20 20h4" stroke="#c0392b" stroke-width="1.4" stroke-linecap="round"/>
+</svg>
