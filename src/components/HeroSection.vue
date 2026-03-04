@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useReveal } from '../composables/useReveal'
+import video1 from '../assets/video1.webm'
 
 const sectionRef = ref<HTMLElement | null>(null)
 useReveal(sectionRef)
@@ -18,7 +19,7 @@ const services = [
   <section id="hero" class="hero" ref="sectionRef">
     <div class="hero__bg">
       <video autoplay muted loop playsinline preload="auto">
-        <source src="/video.mp4" type="video/mp4" />
+        <source :src="video1" type="video/webm" />
       </video>
       <div class="hero__overlay"></div>
       <div class="hero__grain"></div>

@@ -1,24 +1,29 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useReveal } from '../composables/useReveal'
+import video2 from '../assets/video2.webm'
 
 const sectionRef = ref<HTMLElement | null>(null)
 useReveal(sectionRef)
 
-const BALL_LOOP_MS = 12000
+const LOOP_MS = 12000
+const STEP_COUNT = 3
 const activeStep = ref(0)
+const animationKey = ref(0)
 let startTime = 0
 let rafId = 0
 
 function tick() {
-  const elapsed = (Date.now() - startTime) % BALL_LOOP_MS
-  const step = Math.floor((elapsed / BALL_LOOP_MS) * 3) % 3
+  const elapsed = (Date.now() - startTime) % LOOP_MS
+  const progress = elapsed / LOOP_MS
+  const step = Math.floor(progress * STEP_COUNT) % STEP_COUNT
   if (step !== activeStep.value) activeStep.value = step
   rafId = requestAnimationFrame(tick)
 }
 
 onMounted(() => {
   startTime = Date.now()
+  animationKey.value = startTime
   rafId = requestAnimationFrame(tick)
 })
 
@@ -57,6 +62,12 @@ const results = [
 
 <template>
   <section id="practice" class="practice" ref="sectionRef">
+    <div class="practice__bg">
+      <video autoplay muted loop playsinline preload="auto">
+        <source :src="video2" type="video/webm" />
+      </video>
+      <div class="practice__bg-overlay"></div>
+    </div>
     <div class="deco-gradient practice__deco-1"></div>
     <div class="deco-gradient practice__deco-2"></div>
 
@@ -80,8 +91,8 @@ const results = [
             stroke-width="2"
             stroke-linecap="round"
           />
-          <circle class="practice__wave-ball" r="6" fill="var(--color-accent)">
-            <animateMotion dur="12s" repeatCount="indefinite" keyTimes="0;1" keyPoints="0;1">
+          <circle :key="animationKey" class="practice__wave-ball" r="6" fill="var(--color-accent)">
+            <animateMotion :dur="LOOP_MS / 1000 + 's'" repeatCount="indefinite" keyTimes="0;1" keyPoints="0;1">
               <mpath href="#practiceWavePath" />
             </animateMotion>
           </circle>
@@ -92,7 +103,10 @@ const results = [
             :key="stage.num"
             class="practice__wave-dot"
             :class="{ 'practice__wave-dot--active': activeStep === i }"
-            :style="{ left: (i / (stages.length - 1)) * 100 + '%' }"
+            :style="{
+              left: ((i + 0.5) / stages.length) * 100 + '%',
+              transform: i === 0 ? 'translate(-50%, calc(-50% - 14px))' : i === 2 ? 'translate(-50%, calc(-50% + 12px))' : 'translate(-50%, -50%)',
+            }"
           >
             <span class="practice__wave-dot-num">{{ stage.num }}</span>
           </div>
@@ -155,6 +169,28 @@ const results = [
   padding: 96px 0;
   position: relative;
   overflow: hidden;
+}
+
+.practice__bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.practice__bg video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.practice__bg-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(248, 249, 251, 0.92) 0%,
+    rgba(248, 249, 251, 0.96) 100%
+  );
 }
 
 .practice__deco-1 {

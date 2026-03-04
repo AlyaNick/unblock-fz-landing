@@ -5,20 +5,24 @@ import { useReveal } from '../composables/useReveal'
 const sectionRef = ref<HTMLElement | null>(null)
 useReveal(sectionRef)
 
-const BALL_LOOP_MS = 14000
+const LOOP_MS = 14000
+const STEP_COUNT = 4
 const activeStep = ref(0)
+const animationKey = ref(0)
 let startTime = 0
 let rafId = 0
 
 function tick() {
-  const elapsed = (Date.now() - startTime) % BALL_LOOP_MS
-  const step = Math.floor((elapsed / BALL_LOOP_MS) * 4) % 4
+  const elapsed = (Date.now() - startTime) % LOOP_MS
+  const progress = elapsed / LOOP_MS
+  const step = Math.floor(progress * STEP_COUNT) % STEP_COUNT
   if (step !== activeStep.value) activeStep.value = step
   rafId = requestAnimationFrame(tick)
 }
 
 onMounted(() => {
   startTime = Date.now()
+  animationKey.value = startTime
   rafId = requestAnimationFrame(tick)
 })
 
@@ -56,8 +60,8 @@ const steps = [
             stroke-width="2"
             stroke-linecap="round"
           />
-          <circle class="format__line-ball" r="6" fill="var(--color-accent)">
-            <animateMotion dur="14s" repeatCount="indefinite" keyTimes="0;1" keyPoints="0;1">
+          <circle :key="animationKey" class="format__line-ball" r="6" fill="var(--color-accent)">
+            <animateMotion :dur="LOOP_MS / 1000 + 's'" repeatCount="indefinite" keyTimes="0;1" keyPoints="0;1">
               <mpath href="#formatLinePath" />
             </animateMotion>
           </circle>
@@ -68,7 +72,7 @@ const steps = [
             :key="step.num"
             class="format__line-dot"
             :class="{ 'format__line-dot--active': activeStep === i }"
-            :style="{ left: (i / (steps.length - 1)) * 100 + '%' }"
+            :style="{ left: ((i + 0.5) / steps.length) * 100 + '%' }"
           >
             <span class="format__line-dot-num">{{ step.num }}</span>
           </div>
