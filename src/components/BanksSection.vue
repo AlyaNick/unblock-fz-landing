@@ -62,7 +62,6 @@ function onLogoError(name: string) {
               :src="bank.logo"
               :alt="bank.name"
               class="banks__logo"
-              :class="{ 'banks__logo--light': bank.logoLight }"
               :style="bank.logoScale ? { transform: `scale(${bank.logoScale})` } : undefined"
               loading="lazy"
               @error="onLogoError(bank.name)"
@@ -175,11 +174,6 @@ function onLogoError(name: string) {
   opacity: 0.7;
   transition: opacity 0.3s, transform 0.2s ease;
   transform-origin: center;
-}
-
-.banks__logo--light {
-  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.8));
-  opacity: 0.95;
 }
 
 .banks__card:hover .banks__logo {
