@@ -1,21 +1,29 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useReveal } from '../composables/useReveal'
+import sberLogo from '../assets/bankicons/sberlogo.svg'
+import vtbLogo from '../assets/bankicons/vtblogo.svg'
+import alfaLogo from '../assets/bankicons/alfalogo.svg'
+import tinkoffLogo from '../assets/bankicons/tinkoff.svg'
+import tochkaLogo from '../assets/bankicons/tochkabanklogo.svg'
+import rshbLogo from '../assets/bankicons/rshblogo.svg'
+import psbLogo from '../assets/bankicons/psblogo.svg'
+import sovcomLogo from '../assets/bankicons/sovcombanklogo.svg'
 
 const sectionRef = ref<HTMLElement | null>(null)
 useReveal(sectionRef)
 
 const banks = [
-  { name: 'Сбербанк', short: 'СБ', logo: '/img/banks/sberbank.svg' },
-  { name: 'ВТБ', short: 'ВТБ', logo: '/img/banks/vtb.svg' },
-  { name: 'Альфа-Банк', short: 'АБ', logo: '/img/banks/alfa.svg' },
-  { name: 'Тинькофф Банк', short: 'Т', logo: '/img/banks/tinkoff.svg' },
-  { name: 'Точка банк', short: 'ТБ', logo: '/img/banks/tochka.svg' },
-  { name: 'Модуль банк', short: 'МБ', logo: '/img/banks/modul.svg' },
-  { name: 'Бланк банк', short: 'ББ', logo: '/img/banks/blank.svg' },
-  { name: 'Россельхоз банк', short: 'РХ', logo: '/img/banks/rosselhoz.svg' },
-  { name: 'Промсвязьбанк', short: 'ПСБ', logo: '/img/banks/psb.svg' },
-  { name: 'Совкомбанк', short: 'СК', logo: '/img/banks/sovkom.svg' },
+  { name: 'Сбербанк', short: 'СБ', logo: sberLogo, logoScale: 1.15 },
+  { name: 'ВТБ', short: 'ВТБ', logo: vtbLogo, logoScale: 1.2 },
+  { name: 'Альфа-Банк', short: 'АБ', logo: alfaLogo, logoScale: 1.2 },
+  { name: 'Тинькофф Банк', short: 'Т', logo: tinkoffLogo },
+  { name: 'Точка банк', short: 'ТБ', logo: tochkaLogo, logoScale: 1.15 },
+  { name: 'Модуль банк', short: 'МБ', logo: null as string | null },
+  { name: 'Бланк банк', short: 'ББ', logo: null as string | null },
+  { name: 'Россельхоз банк', short: 'РХ', logo: rshbLogo, logoScale: 1.2 },
+  { name: 'Промсвязьбанк', short: 'ПСБ', logo: psbLogo, logoScale: 1.15 },
+  { name: 'Совкомбанк', short: 'СК', logo: sovcomLogo, logoScale: 1.2 },
 ]
 
 const logoErrors = ref<Set<string>>(new Set())
@@ -49,14 +57,17 @@ function onLogoError(name: string) {
           v-for="(bank, i) in banks"
           :key="bank.name"
         >
-          <img
-            v-if="!logoErrors.has(bank.name)"
-            :src="bank.logo"
-            :alt="bank.name"
-            class="banks__logo"
-            loading="lazy"
-            @error="onLogoError(bank.name)"
-          />
+          <div v-if="bank.logo && !logoErrors.has(bank.name)" class="banks__logo-wrap">
+            <img
+              :src="bank.logo"
+              :alt="bank.name"
+              class="banks__logo"
+              :class="{ 'banks__logo--light': bank.logoLight }"
+              :style="bank.logoScale ? { transform: `scale(${bank.logoScale})` } : undefined"
+              loading="lazy"
+              @error="onLogoError(bank.name)"
+            />
+          </div>
           <div v-else class="banks__logo-placeholder">
             {{ bank.short }}
           </div>
@@ -146,13 +157,29 @@ function onLogoError(name: string) {
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
+.banks__logo-wrap {
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
 .banks__logo {
   width: 52px;
   height: 52px;
   object-fit: contain;
+  object-position: center;
   filter: brightness(0) invert(1);
   opacity: 0.7;
-  transition: opacity 0.3s;
+  transition: opacity 0.3s, transform 0.2s ease;
+  transform-origin: center;
+}
+
+.banks__logo--light {
+  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.8));
+  opacity: 0.95;
 }
 
 .banks__card:hover .banks__logo {
@@ -211,6 +238,7 @@ function onLogoError(name: string) {
   .banks__title { font-size: 26px; }
   .banks__grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
   .banks__card { padding: 20px 12px; }
+  .banks__logo-wrap { width: 40px; height: 40px; }
   .banks__logo { width: 40px; height: 40px; }
   .banks__logo-placeholder { width: 40px; height: 40px; font-size: 14px; }
 }
