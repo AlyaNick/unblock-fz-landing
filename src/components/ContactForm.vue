@@ -1,28 +1,130 @@
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
+import { reactive, ref, computed, nextTick } from 'vue'
 import { useReveal } from '../composables/useReveal'
+import DocumentModals from './DocumentModals.vue'
 
 const sectionRef = ref<HTMLElement | null>(null)
 useReveal(sectionRef)
 
+const docModalsRef = ref<InstanceType<typeof DocumentModals> | null>(null)
 const submitted = ref(false)
+const isSubmitting = ref(false)
+const submitError = ref('')
+const phoneTouched = ref(false)
 const errors = reactive<Record<string, string>>({})
 
 const form = reactive({
   name: '',
   phone: '',
   problem: '',
+  agreeConsent: false,
+  consentMarketing: false,
 })
+
+function normalizePhoneDigits(raw: string): string {
+  let d = raw.replace(/\D/g, '')
+  if (d.startsWith('8')) d = '7' + d.slice(1)
+  else if (d.length > 0 && d[0] !== '7') d = '7' + d
+  return d.slice(0, 11)
+}
+
+function formatPhoneMask(digits: string): string {
+  if (digits.length === 0) return ''
+  if (digits.length <= 1) return '+7'
+  if (digits.length <= 4) return `+7 (${digits.slice(1)}`
+  if (digits.length <= 7) return `+7 (${digits.slice(1, 4)}) ${digits.slice(4)}`
+  return `+7 (${digits.slice(1, 4)}) ${digits.slice(4, 7)}-${digits.slice(7, 9)}-${digits.slice(9, 11)}`
+}
+
+function positionAfterDigits(str: string, digitCount: number): number {
+  let count = 0
+  for (let i = 0; i < str.length; i++) {
+    if (/\d/.test(str.charAt(i))) count++
+    if (count >= digitCount) return i + 1
+  }
+  return str.length
+}
+
+function onPhoneInput(e: Event) {
+  const el = e.target as HTMLInputElement
+  const digits = normalizePhoneDigits(el.value || '')
+  form.phone = formatPhoneMask(digits)
+  const cursorAfter = digits.length
+  nextTick(() => {
+    const pos = positionAfterDigits(form.phone, cursorAfter)
+    el.setSelectionRange(pos, pos)
+  })
+}
+
+function isRussianPhone(value: string): boolean {
+  const digits = value.replace(/\D/g, '')
+  if (digits.length === 11) return digits[0] === '7' || digits[0] === '8'
+  if (digits.length === 10) return true
+  return false
+}
+
+const phoneError = computed(() => {
+  const v = form.phone.trim()
+  if (!v) return 'Укажите номер телефона'
+  if (!isRussianPhone(v)) return 'Введите корректный российский номер (+7 …)'
+  return ''
+})
+
+const showPhoneError = computed(() => phoneTouched.value && phoneError.value)
+
+const canSubmit = computed(() =>
+  form.name.trim() &&
+  form.phone.trim() &&
+  !phoneError.value &&
+  form.agreeConsent
+)
 
 function validate(): boolean {
   errors.name = form.name.trim() ? '' : 'Укажите имя'
-  errors.phone = form.phone.trim() ? '' : 'Укажите телефон'
+  errors.phone = phoneError.value
   return !errors.name && !errors.phone
 }
 
-function onSubmit() {
-  if (!validate()) return
-  submitted.value = true
+function openDoc(doc: 'policy' | 'consent') {
+  docModalsRef.value?.open(doc)
+}
+
+function closeSuccess() {
+  submitted.value = false
+}
+
+async function onSubmit() {
+  if (!canSubmit.value || !validate()) return
+  submitError.value = ''
+  isSubmitting.value = true
+  try {
+    const res = await fetch('/api/send.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: form.name.trim(),
+        phone: form.phone.trim(),
+        problem: form.problem.trim(),
+        consentMarketing: form.consentMarketing,
+      }),
+    })
+    const data = (await res.json().catch(() => ({}))) as { ok?: boolean; error?: string; detail?: string }
+    if (!res.ok) {
+      const msg = [data.error, data.detail].filter(Boolean).join(' ') || `Ошибка ${res.status}`
+      throw new Error(msg)
+    }
+    submitted.value = true
+    form.name = ''
+    form.phone = ''
+    form.problem = ''
+    form.agreeConsent = false
+    form.consentMarketing = false
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : 'Не удалось отправить. Попробуйте позже.'
+    submitError.value = msg
+  } finally {
+    isSubmitting.value = false
+  }
 }
 </script>
 
@@ -64,13 +166,12 @@ function onSubmit() {
       </div>
 
       <div class="cta__form-card reveal-right">
-        <div v-if="!submitted">
-          <h3 class="cta__form-title">Оставить заявку</h3>
+        <h3 class="cta__form-title">Оставить заявку</h3>
 
-          <form class="cta__form" @submit.prevent="onSubmit" novalidate>
+        <form class="cta__form" @submit.prevent="onSubmit" novalidate>
             <div class="cta__row">
               <div class="cta__field">
-                <label class="cta__label" for="f-name">Имя</label>
+                <label class="cta__label" for="f-name">Имя <span class="cta__label-required">*</span></label>
                 <input
                   id="f-name"
                   v-model="form.name"
@@ -78,22 +179,28 @@ function onSubmit() {
                   :class="{ 'cta__input--error': errors.name }"
                   type="text"
                   placeholder="Иван Петров"
+                  required
                   @blur="validate"
                 />
                 <span v-if="errors.name" class="cta__error">{{ errors.name }}</span>
               </div>
               <div class="cta__field">
-                <label class="cta__label" for="f-phone">Телефон</label>
+                <label class="cta__label" for="f-phone">Телефон <span class="cta__label-required">*</span></label>
                 <input
                   id="f-phone"
-                  v-model="form.phone"
+                  :value="form.phone"
                   class="cta__input"
-                  :class="{ 'cta__input--error': errors.phone }"
+                  :class="{ 'cta__input--error': showPhoneError }"
                   type="tel"
+                  inputmode="numeric"
+                  autocomplete="tel"
+                  maxlength="18"
                   placeholder="+7 (___) ___-__-__"
-                  @blur="validate"
+                  required
+                  @input="onPhoneInput"
+                  @blur="phoneTouched = true; validate()"
                 />
-                <span v-if="errors.phone" class="cta__error">{{ errors.phone }}</span>
+                <span v-if="showPhoneError" class="cta__error">{{ phoneError }}</span>
               </div>
             </div>
 
@@ -108,21 +215,64 @@ function onSubmit() {
               ></textarea>
             </div>
 
-            <button type="submit" class="btn btn--primary cta__submit">
-              Отправить заявку
-            </button>
-          </form>
-        </div>
+            <div class="cta__consents">
+              <label class="cta__checkbox">
+                <input v-model="form.agreeConsent" type="checkbox" required>
+                <span>
+                  Я даю
+                  <button type="button" class="cta__doc-link" @click.prevent="openDoc('consent')">согласие</button>
+                  на обработку персональных данных в связи с
+                  <button type="button" class="cta__doc-link" @click.prevent="openDoc('policy')">политикой</button>
+                </span>
+              </label>
+              <label class="cta__checkbox cta__checkbox--spaced">
+                <input v-model="form.consentMarketing" type="checkbox">
+                <span>Согласие на рекламные рассылки (получение рекламы и т.д.)</span>
+              </label>
+            </div>
 
-        <div v-else class="cta__success">
-          <div class="cta__success-icon">&#10003;</div>
-          <h3 class="cta__success-title">Заявка отправлена</h3>
-          <p class="cta__success-desc">
-            Мы свяжемся с&nbsp;вами в&nbsp;ближайшее время.
-          </p>
-        </div>
+            <p v-if="submitError" class="cta__submit-error">{{ submitError }}</p>
+
+            <button
+              type="submit"
+              class="btn btn--primary cta__submit"
+              :disabled="!canSubmit || isSubmitting"
+            >
+              {{ isSubmitting ? 'Отправка...' : 'Отправить заявку' }}
+            </button>
+        </form>
       </div>
     </div>
+
+    <DocumentModals ref="docModalsRef" />
+
+    <Teleport to="body">
+      <Transition name="success-popup">
+        <div
+          v-if="submitted"
+          class="success-popup__backdrop"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="success-title"
+          @click.self="closeSuccess"
+        >
+          <div class="success-popup__box">
+            <div class="success-popup__icon">&#10003;</div>
+            <h3 id="success-title" class="success-popup__title">Заявка отправлена</h3>
+            <p class="success-popup__text">
+              Мы свяжемся с&nbsp;вами в&nbsp;ближайшее время.
+            </p>
+            <button
+              type="button"
+              class="success-popup__btn"
+              @click="closeSuccess"
+            >
+              Закрыть
+            </button>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
   </section>
 </template>
 
@@ -236,6 +386,10 @@ function onSubmit() {
   color: rgba(255, 255, 255, 0.6);
 }
 
+.cta__label-required {
+  color: var(--color-accent);
+}
+
 .cta__input,
 .cta__textarea {
   padding: 14px 16px;
@@ -275,6 +429,50 @@ function onSubmit() {
   color: #e74c3c;
 }
 
+.cta__consents {
+  margin-top: 4px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.cta__checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.cta__checkbox + .cta__checkbox--spaced {
+  margin-top: 14px;
+}
+
+.cta__checkbox input {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  flex-shrink: 0;
+  accent-color: var(--color-accent);
+  cursor: pointer;
+}
+
+.cta__doc-link {
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  color: var(--color-accent);
+  text-decoration: underline;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.cta__doc-link:hover {
+  color: var(--color-accent-hover);
+}
+
 .cta__submit {
   width: 100%;
   height: 52px;
@@ -282,36 +480,102 @@ function onSubmit() {
   margin-top: 4px;
 }
 
-.cta__success {
-  text-align: center;
-  padding: 40px 16px;
+.cta__submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
-.cta__success-icon {
-  width: 56px;
-  height: 56px;
-  margin: 0 auto 20px;
-  background: rgba(39, 174, 96, 0.15);
-  color: var(--color-green);
-  border-radius: 50%;
+.cta__submit-error {
+  margin: 0;
+  font-size: 13px;
+  color: #e74c3c;
+}
+
+/* Маленькое модальное окно после отправки (как в bookkeep-landing) */
+.success-popup__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 26px;
-  font-weight: 700;
+  padding: 1.5rem;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
 }
 
-.cta__success-title {
-  font-size: 22px;
+.success-popup__box {
+  text-align: center;
+  padding: 2rem 2.5rem;
+  background: var(--color-bg-dark, #0c1220);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
+  max-width: 360px;
+}
+
+.success-popup__icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(39, 174, 96, 0.2);
+  color: var(--color-green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0 auto 1rem;
+}
+
+.success-popup__title {
+  font-size: 1.25rem;
   font-weight: 700;
   color: #fff;
-  margin-bottom: 10px;
+  margin: 0 0 0.5rem;
 }
 
-.cta__success-desc {
-  font-size: 15px;
-  line-height: 1.6;
-  color: rgba(255, 255, 255, 0.5);
+.success-popup__text {
+  font-size: 0.9375rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0 0 1.5rem;
+  line-height: 1.5;
+}
+
+.success-popup__btn {
+  padding: 0.625rem 1.5rem;
+  background: var(--color-accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.success-popup__btn:hover {
+  opacity: 0.9;
+}
+
+.success-popup-enter-active,
+.success-popup-leave-active {
+  transition: opacity 0.25s ease;
+}
+
+.success-popup-enter-from,
+.success-popup-leave-to {
+  opacity: 0;
+}
+
+.success-popup-enter-active .success-popup__box,
+.success-popup-leave-active .success-popup__box {
+  transition: transform 0.25s ease;
+}
+
+.success-popup-enter-from .success-popup__box,
+.success-popup-leave-to .success-popup__box {
+  transform: scale(0.96);
 }
 
 @media (max-width: 860px) {

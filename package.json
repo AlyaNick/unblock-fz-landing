@@ -4,19 +4,37 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vue-tsc -b && vite build",
-    "preview": "vite preview"
+    "dev": "dotenv -e .env -- run-p dev:client dev:server",
+    "dev:client": "vite",
+    "dev:server": "node server/index.js",
+    "build": "run-p type-check \"build-only {@}\" --",
+    "build-only": "vite build",
+    "type-check": "vue-tsc --build",
+    "preview": "vite preview",
+    "start": "dotenv -e .env -- node server/index.js",
+    "prod": "npm ci && npm run build && dotenv -e .env -- node server/index.js"
   },
   "dependencies": {
-    "vue": "^3.5.25"
+    "@vue/server-renderer": "^3.5.0",
+    "dotenv": "^16.6.1",
+    "express": "^4.22.1",
+    "nodemailer": "^6.10.1",
+    "vue": "^3.5.29"
   },
   "devDependencies": {
-    "@types/node": "^24.10.1",
-    "@vitejs/plugin-vue": "^6.0.2",
+    "dotenv-cli": "^7.4.2",
+    "vite-node": "^2.0.0",
+    "@tsconfig/node24": "^24.0.4",
+    "@types/node": "^24.11.0",
+    "@vitejs/plugin-vue": "^6.0.4",
     "@vue/tsconfig": "^0.8.1",
+    "npm-run-all2": "^8.0.4",
     "typescript": "~5.9.3",
     "vite": "^7.3.1",
-    "vue-tsc": "^3.1.5"
+    "vite-plugin-vue-devtools": "^8.0.6",
+    "vue-tsc": "^3.2.5"
+  },
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
   }
 }
