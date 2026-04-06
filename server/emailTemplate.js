@@ -8,12 +8,13 @@ function escapeHtml(str) {
 }
 
 /**
- * @param {{ name: string, phone: string, problem: string, consentMarketing: boolean }} data
+ * @param {{ name: string, phone: string, email: string, problem: string, consentMarketing: boolean }} data
  */
 export function buildEmailHtml(data) {
   const esc = (s) => escapeHtml(String(s))
   const name = data.name ? esc(data.name) : '—'
   const phone = data.phone ? esc(data.phone) : '—'
+  const email = data.email ? esc(data.email) : '—'
   const problemHtml = data.problem ? esc(data.problem).replace(/\n/g, '<br>') : '—'
 
   const tags = data.consentMarketing
@@ -37,6 +38,7 @@ export function buildEmailHtml(data) {
     .mail-label{color:#64748b;font-size:13px;margin-right:12px;}
     .mail-name{color:#0f172a;font-size:15px;font-weight:600;}
     .mail-phone{color:#1e3a5f;font-size:15px;font-weight:600;}
+    .mail-email{color:#1e3a5f;font-size:15px;font-weight:600;word-break:break-all;}
     .mail-message-label{margin:0 0 8px;color:#64748b;font-size:12px;text-transform:uppercase;letter-spacing:0.05em;}
     .mail-message-body{margin:0;color:#0f172a;font-size:15px;line-height:1.6;}
     .mail-footer{padding:16px 18px 24px;border-top:1px solid #f1f5f9;color:#94a3b8;font-size:12px;}
@@ -58,7 +60,8 @@ export function buildEmailHtml(data) {
     <tr>
       <td class="mail-contact">
         <p style="margin:0 0 10px;"><span class="mail-label">Имя</span><span class="mail-name">${name}</span></p>
-        <p style="margin:0;"><span class="mail-label">Телефон</span><span class="mail-phone">${phone}</span></p>
+        <p style="margin:0 0 10px;"><span class="mail-label">Телефон</span><span class="mail-phone">${phone}</span></p>
+        <p style="margin:0;"><span class="mail-label">Email</span><span class="mail-email">${email}</span></p>
       </td>
     </tr>
     ${tags}

@@ -24,7 +24,7 @@ if (!file_exists($configFile)) {
 $config = require $configFile;
 if (empty($config['email']) || empty($config['password'])) {
     http_response_code(500);
-    echo json_encode(['error' => 'В config.php укажите email и пароль приложения для SMTP.']);
+    echo json_encode(['error' => 'В .env укажите OPERATOR_EMAIL и YANDEX_APP_PASSWORD для SMTP.']);
     exit;
 }
 
@@ -36,12 +36,32 @@ if (!$input) {
 }
 
 $name    = trim($input['name'] ?? '') ?: '—';
-$phone   = trim($input['phone'] ?? '') ?: '—';
+$phone   = trim($input['phone'] ?? '');
+$emailRaw = trim($input['email'] ?? '');
 $problem = trim($input['problem'] ?? '') ?: '—';
 $consentMarketing = !empty($input['consentMarketing']);
 
-$subject = "Новая заявка (Unblock FZ): $name $phone";
-$html    = buildEmailHtml($name, $phone, $problem, $consentMarketing);
+if ($phone === '' && $emailRaw === '') {
+    http_response_code(400);
+    echo json_encode(['error' => 'Укажите телефон или email']);
+    exit;
+}
+if ($emailRaw !== '' && !filter_var($emailRaw, FILTER_VALIDATE_EMAIL)) {
+    http_response_code(400);
+    echo json_encode(['error' => 'Введите корректный email']);
+    exit;
+}
+
+$phoneDisplay = $phone !== '' ? $phone : '—';
+$emailDisplay = $emailRaw !== '' ? $emailRaw : '—';
+
+$replyTo = $config['email'];
+if ($emailRaw !== '' && filter_var($emailRaw, FILTER_VALIDATE_EMAIL)) {
+    $replyTo = $emailRaw;
+}
+
+$subject = 'Новая заявка: ' . $name . ' ' . ($phone !== '' ? $phone : $emailRaw);
+$html    = buildEmailHtml($name, $phoneDisplay, $emailDisplay, $problem, $consentMarketing);
 
 $result = smtpSend(
     $config['smtp_host'],
@@ -50,6 +70,7 @@ $result = smtpSend(
     $config['password'],
     $config['email'],
     $config['email'],
+    $replyTo,
     $subject,
     $html
 );
@@ -66,7 +87,7 @@ if ($result === true) {
 
 /* ── SMTP ────────────────────────────────────────────── */
 
-function smtpSend($host, $port, $user, $pass, $from, $to, $subject, $htmlBody) {
+function smtpSend($host, $port, $user, $pass, $from, $to, $replyTo, $subject, $htmlBody) {
     $sock = @stream_socket_client(
         "ssl://$host:$port", $errno, $errstr, 30,
         STREAM_CLIENT_CONNECT,
@@ -105,7 +126,7 @@ function smtpSend($host, $port, $user, $pass, $from, $to, $subject, $htmlBody) {
 
     $msg  = "From: =?UTF-8?B?" . base64_encode("Экстренная разблокировка по 115-ФЗ") . "?= <$from>\r\n";
     $msg .= "To: <$to>\r\n";
-    $msg .= "Reply-To: <$from>\r\n";
+    $msg .= "Reply-To: <$replyTo>\r\n";
     $msg .= "Subject: =?UTF-8?B?" . base64_encode($subject) . "?=\r\n";
     $msg .= "MIME-Version: 1.0\r\n";
     $msg .= "Content-Type: text/html; charset=UTF-8\r\n";
@@ -129,9 +150,10 @@ function esc($s) {
     return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
 }
 
-function buildEmailHtml($name, $phone, $problem, $consentMarketing) {
+function buildEmailHtml($name, $phone, $email, $problem, $consentMarketing) {
     $name   = esc($name);
     $phone  = esc($phone);
+    $email  = esc($email);
     $problemHtml = nl2br(esc($problem));
 
     $tags = '';
@@ -157,6 +179,7 @@ function buildEmailHtml($name, $phone, $problem, $consentMarketing) {
     .mail-label{color:#64748b;font-size:13px;margin-right:12px;}
     .mail-name{color:#0f172a;font-size:15px;font-weight:600;}
     .mail-phone{color:#1e3a5f;font-size:15px;font-weight:600;}
+    .mail-email{color:#1e3a5f;font-size:15px;font-weight:600;word-break:break-all;}
     .mail-message-label{margin:0 0 8px;color:#64748b;font-size:12px;text-transform:uppercase;letter-spacing:0.05em;}
     .mail-message-body{margin:0;color:#0f172a;font-size:15px;line-height:1.6;}
     .mail-footer{padding:16px 18px 24px;border-top:1px solid #f1f5f9;color:#94a3b8;font-size:12px;}
@@ -178,7 +201,8 @@ function buildEmailHtml($name, $phone, $problem, $consentMarketing) {
     <tr>
       <td class="mail-contact">
         <p style="margin:0 0 10px;"><span class="mail-label">Имя</span><span class="mail-name">$name</span></p>
-        <p style="margin:0;"><span class="mail-label">Телефон</span><span class="mail-phone">$phone</span></p>
+        <p style="margin:0 0 10px;"><span class="mail-label">Телефон</span><span class="mail-phone">$phone</span></p>
+        <p style="margin:0;"><span class="mail-label">Email</span><span class="mail-email">$email</span></p>
       </td>
     </tr>
     $tags

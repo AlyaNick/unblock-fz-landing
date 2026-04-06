@@ -11,11 +11,13 @@ const submitted = ref(false)
 const isSubmitting = ref(false)
 const submitError = ref('')
 const phoneTouched = ref(false)
+const emailTouched = ref(false)
 const errors = reactive<Record<string, string>>({})
 
 const form = reactive({
   name: '',
   phone: '',
+  email: '',
   problem: '',
   agreeConsent: false,
   consentMarketing: false,
@@ -65,24 +67,55 @@ function isRussianPhone(value: string): boolean {
 
 const phoneError = computed(() => {
   const v = form.phone.trim()
-  if (!v) return 'Укажите номер телефона'
+  if (!v) return ''
   if (!isRussianPhone(v)) return 'Введите корректный российский номер (+7 …)'
   return ''
 })
 
 const showPhoneError = computed(() => phoneTouched.value && phoneError.value)
 
-const canSubmit = computed(() =>
-  form.name.trim() &&
-  form.phone.trim() &&
-  !phoneError.value &&
-  form.agreeConsent
-)
+function isValidEmail(value: string): boolean {
+  const v = value.trim()
+  if (!v) return false
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)
+}
+
+const emailError = computed(() => {
+  const v = form.email.trim()
+  if (!v) return ''
+  if (!isValidEmail(v)) return 'Введите корректный email'
+  return ''
+})
+
+const showEmailError = computed(() => emailTouched.value && emailError.value)
+
+const contactError = computed(() => {
+  const hasPhone = Boolean(form.phone.trim())
+  const hasEmail = Boolean(form.email.trim())
+  if (hasPhone || hasEmail) return ''
+  if (!phoneTouched.value && !emailTouched.value) return ''
+  return 'Укажите телефон или email'
+})
+
+const canSubmit = computed(() => {
+  if (!form.name.trim() || !form.agreeConsent) return false
+  const hasPhone = Boolean(form.phone.trim())
+  const hasEmail = Boolean(form.email.trim())
+  if (!hasPhone && !hasEmail) return false
+  if (hasPhone && phoneError.value) return false
+  if (hasEmail && emailError.value) return false
+  return true
+})
 
 function validate(): boolean {
   errors.name = form.name.trim() ? '' : 'Укажите имя'
   errors.phone = phoneError.value
-  return !errors.name && !errors.phone
+  return (
+    !errors.name &&
+    !errors.phone &&
+    !emailError.value &&
+    !contactError.value
+  )
 }
 
 function openDoc(doc: 'policy' | 'consent') {
@@ -94,6 +127,8 @@ function closeSuccess() {
 }
 
 async function onSubmit() {
+  phoneTouched.value = true
+  emailTouched.value = true
   if (!canSubmit.value || !validate()) return
   submitError.value = ''
   isSubmitting.value = true
@@ -104,6 +139,7 @@ async function onSubmit() {
       body: JSON.stringify({
         name: form.name.trim(),
         phone: form.phone.trim(),
+        email: form.email.trim(),
         problem: form.problem.trim(),
         consentMarketing: form.consentMarketing,
       }),
@@ -116,9 +152,12 @@ async function onSubmit() {
     submitted.value = true
     form.name = ''
     form.phone = ''
+    form.email = ''
     form.problem = ''
     form.agreeConsent = false
     form.consentMarketing = false
+    phoneTouched.value = false
+    emailTouched.value = false
   } catch (e) {
     const msg = e instanceof Error ? e.message : 'Не удалось отправить. Попробуйте позже.'
     submitError.value = msg
@@ -185,7 +224,7 @@ async function onSubmit() {
                 <span v-if="errors.name" class="cta__error">{{ errors.name }}</span>
               </div>
               <div class="cta__field">
-                <label class="cta__label" for="f-phone">Телефон <span class="cta__label-required">*</span></label>
+                <label class="cta__label" for="f-phone">Телефон</label>
                 <input
                   id="f-phone"
                   :value="form.phone"
@@ -196,13 +235,30 @@ async function onSubmit() {
                   autocomplete="tel"
                   maxlength="18"
                   placeholder="+7 (___) ___-__-__"
-                  required
                   @input="onPhoneInput"
                   @blur="phoneTouched = true; validate()"
                 />
                 <span v-if="showPhoneError" class="cta__error">{{ phoneError }}</span>
               </div>
             </div>
+
+            <div class="cta__field">
+              <label class="cta__label" for="f-email">Email</label>
+              <input
+                id="f-email"
+                v-model="form.email"
+                class="cta__input"
+                :class="{ 'cta__input--error': showEmailError }"
+                type="email"
+                inputmode="email"
+                autocomplete="email"
+                placeholder="name@example.com"
+                @blur="emailTouched = true; validate()"
+              />
+              <span v-if="showEmailError" class="cta__error">{{ emailError }}</span>
+            </div>
+
+            <p v-if="contactError" class="cta__error cta__error--block">{{ contactError }}</p>
 
             <div class="cta__field">
               <label class="cta__label" for="f-problem">Краткое описание ситуации</label>
@@ -429,6 +485,10 @@ async function onSubmit() {
   color: #e74c3c;
 }
 
+.cta__error--block {
+  margin: 0;
+}
+
 .cta__consents {
   margin-top: 4px;
   padding-top: 16px;
@@ -506,12 +566,12 @@ async function onSubmit() {
 
 .success-popup__box {
   text-align: center;
-  padding: 2rem 2.5rem;
+  padding: 1.5rem 2rem;
   background: var(--color-bg-dark, #0c1220);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--radius-lg);
   box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
-  max-width: 360px;
+  max-width: 400px;
 }
 
 .success-popup__icon {

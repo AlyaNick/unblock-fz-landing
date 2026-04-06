@@ -10,6 +10,7 @@ import ContactForm from './components/ContactForm.vue'
 import SiteFooter from './components/SiteFooter.vue'
 import ScrollToTop from './components/ScrollToTop.vue'
 import ImportantNote from './components/ImportantNote.vue'
+import CookieConsentBanner from './components/CookieConsentBanner.vue'
 </script>
 
 <template>
@@ -24,6 +25,7 @@ import ImportantNote from './components/ImportantNote.vue'
   <SiteFooter />
   <ScrollToTop />
   <ImportantNote />
+  <CookieConsentBanner />
 </template>
 
 <style scoped>

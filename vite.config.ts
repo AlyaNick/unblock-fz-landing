@@ -7,6 +7,7 @@ export default defineConfig(({ mode }) => {
   const apiTarget = env.API_PROXY_TARGET?.trim() || 'http://127.0.0.1:3001'
 
   return {
+    envPrefix: ['VITE_', 'OPERATOR_'],
     plugins: [vue()],
     server: {
       proxy: {

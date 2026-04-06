@@ -30,13 +30,25 @@ app.post(['/api/send', '/api/send.php'], async (req, res) => {
   const {
     name = '',
     phone = '',
+    email = '',
     problem = '',
     consentMarketing = false,
   } = req.body ?? {}
 
+  const emailTrim = typeof email === 'string' ? email.trim() : ''
+  const phoneTrim = typeof phone === 'string' ? phone.trim() : ''
+
+  if (!phoneTrim && !emailTrim) {
+    return res.status(400).json({ error: 'Укажите телефон или email' })
+  }
+  if (emailTrim && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailTrim)) {
+    return res.status(400).json({ error: 'Введите корректный email' })
+  }
+
   const data = {
     name: name || '—',
-    phone: phone || '—',
+    phone: phoneTrim || '',
+    email: emailTrim || '',
     problem: problem || '—',
     consentMarketing,
   }
@@ -48,12 +60,17 @@ app.post(['/api/send', '/api/send.php'], async (req, res) => {
     auth: { user: operatorEmail, pass: yandexAppPassword },
   })
 
+  const replyTo =
+    data.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)
+      ? data.email
+      : operatorEmail
+
   try {
     await transporter.sendMail({
       from: `"115-ФЗ Защита" <${operatorEmail}>`,
       to: operatorEmail,
-      replyTo: operatorEmail,
-      subject: `Новая заявка (Unblock FZ): ${data.name} ${data.phone}`,
+      replyTo,
+      subject: `Новая заявка (Unblock FZ): ${data.name} ${data.phone || data.email || ''}`,
       html: buildEmailHtml(data),
     })
     return res.json({ ok: true })
